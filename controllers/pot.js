@@ -2,7 +2,7 @@
 
 const Pot = require('../models/pot')
 
-function getPot (req, res){
+function getPot (req, res) {
   let potId = req.params.potId
 
   Pot.findById(potId, (err, pot) => {
@@ -13,7 +13,7 @@ function getPot (req, res){
   })
 }
 
-function getPots (req, res){
+function getPots (req, res) {
   Pot.find({}, (err, pots) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!pots) return res.status(404).send({ message: 'No existen pots' })
@@ -22,7 +22,7 @@ function getPots (req, res){
   })
 }
 
-function createPot (req, res){
+function createPot (req, res) {
   console.log('POST /api/pots')
   console.log(req.body)
 
@@ -36,17 +36,17 @@ function createPot (req, res){
   })
 }
 
-function updatePot (req, res){
+function updatePot (req, res) {
   let potId = req.params.potId
   let update = req.body
 
-  Pot.findByIdAndUpdate(potId, update, {new:true}, (err, potUpdated) => {
+  Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     res.status(200).send({ pot: potUpdated })
   })
 }
 
-function deletePot (req, res){
+function deletePot (req, res) {
   let potId = req.params.potId
 
   Pot.findById(potId, (err, pot) => {
