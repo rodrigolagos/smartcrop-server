@@ -1,4 +1,4 @@
-const socket = io.connect('http://192.168.1.102:3000', { forceNow: true })
+const socket = io.connect('http://localhost:3000', { forceNow: true })
 
 socket.on('welcome', (data) => {
   console.log(data)
