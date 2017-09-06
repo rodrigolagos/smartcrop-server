@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Smartcrop</title>
+</head>
+<body>
+  <h1>Smartcrop</h1>
+  <h3>Humedad: <span id="humidity-value"></span></h3>
+
+  <form onsubmit="return changeHumidity(this)">
+    <input id="humidityInput" type="text" name="" value="" placeholder="Humedad">
+    <input type="submit" name="" value="Enviar">
+  </form>
+
+  <script src="/scripts/jquery/dist/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 const mongoose = require('mongoose')
 const app = require('./app')
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
 const config = require('./config')
 
 mongoose.connect(config.db, (err, res) => {
@@ -9,6 +11,16 @@ mongoose.connect(config.db, (err, res) => {
   console.log('Conexión establecida a la base de datos')
 })
 
-app.listen(config.port, () => {
+io.on('connection', (socket) => {
+  console.log('Alguien se ha conectado')
+
+  socket.emit('welcome', { message: 'Bienvenido a Smartcrop' })
+
+  socket.on('change humidity', (data) => {
+    io.sockets.emit('humidity', data)
+  })
+})
+
+server.listen(config.port, () => {
   console.log(`Smartcrop API running on port ${config.port}`)
 })

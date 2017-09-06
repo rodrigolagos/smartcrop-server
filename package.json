@@ -12,6 +12,10 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
-    "mongoose": "^4.11.10"
+    "mongoose": "^4.11.10",
+    "socket.io": "^2.0.3"
+  },
+  "devDependencies": {
+    "jquery": "^3.2.1"
   }
 }
