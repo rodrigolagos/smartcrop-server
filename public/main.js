@@ -1,3 +1,5 @@
+/* global io, $ */
+
 const socket = io.connect('http://localhost:3000', { forceNow: true })
 
 socket.on('welcome', (data) => {
@@ -8,7 +10,7 @@ socket.on('humidity', (data) => {
   $('#humidity-value').html(data)
 })
 
-function changeHumidity () {
+function changeHumidity () { // eslint-disable-line
   var newHumidity = $('#humidityInput').val()
   socket.emit('change humidity', newHumidity)
   return false
