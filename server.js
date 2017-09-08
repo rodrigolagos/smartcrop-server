@@ -6,7 +6,7 @@ const server = require('http').Server(app)
 const io = require('socket.io')(server)
 const config = require('./config')
 
-mongoose.connect(config.db, (err, res) => {
+mongoose.connect(config.db, {useMongoClient: true}, (err, res) => {
   if (err) return console.log(`No se ha podido conectar a la base de datos: ${err}`)
   console.log('Conexión establecida a la base de datos')
 })
