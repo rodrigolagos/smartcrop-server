@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('activate bomb', (data) => {
-    io.sockets.emit('bomb', data.message)
+    io.sockets.emit('bomb', data)
   })
 })
 
