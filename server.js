@@ -19,6 +19,10 @@ io.on('connection', (socket) => {
   socket.on('change humidity', (data) => {
     io.sockets.emit('humidity', data)
   })
+
+  socket.on('activate bomb', (data) => {
+    io.sockets.emit('bomb', data.message)
+  })
 })
 
 server.listen(config.port, () => {

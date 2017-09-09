@@ -7,11 +7,20 @@ socket.on('welcome', (data) => {
 })
 
 socket.on('humidity', (data) => {
-  $('#humidity-value').html(data)
+  $('#humidity-value').html(data.message)
+})
+
+socket.on('bomb', (data) => {
+  console.log(data)
 })
 
 function changeHumidity () { // eslint-disable-line
   var newHumidity = $('#humidityInput').val()
-  socket.emit('change humidity', newHumidity)
+  socket.emit('change humidity', {message: newHumidity})
+  return false
+}
+
+function activateBomb () { // eslint-disable-line
+  socket.emit('activate bomb', {message: 'Activar bomba'})
   return false
 }
