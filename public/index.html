@@ -14,9 +14,13 @@
     <input id="humidityInput" type="text" name="" value="" placeholder="Humedad">
     <input type="submit" name="" value="Enviar">
   </form>
-  
+
   <form onsubmit="return activateBomb(this)">
-    <input type="submit" name="bomba" value="Bomba">
+    <input type="submit" name="bomba" value="Encender Bomba">
+  </form>
+
+  <form onsubmit="return deactivateBomb(this)">
+    <input type="submit" name="bomba" value="Apagar Bomba">
   </form>
 
   <script src="/scripts/jquery/dist/jquery.min.js"></script>

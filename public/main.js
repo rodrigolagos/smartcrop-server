@@ -11,7 +11,7 @@ socket.on('humidity', (data) => {
 })
 
 socket.on('bomb', (data) => {
-  console.log(data)
+  console.log(data.message)
 })
 
 function changeHumidity () { // eslint-disable-line
@@ -21,6 +21,11 @@ function changeHumidity () { // eslint-disable-line
 }
 
 function activateBomb () { // eslint-disable-line
-  socket.emit('activate bomb', {message: 'Activar bomba'})
+  socket.emit('action bomb', {message: 'Activar bomba'})
+  return false
+}
+
+function deactivateBomb () { // eslint-disable-line
+  socket.emit('action bomb', {message: 'Desactivar bomba'})
   return false
 }

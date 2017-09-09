@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
     io.sockets.emit('humidity', data)
   })
 
-  socket.on('activate bomb', (data) => {
+  socket.on('action bomb', (data) => {
     io.sockets.emit('bomb', data)
   })
 })
