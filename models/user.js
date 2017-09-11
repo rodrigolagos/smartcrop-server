@@ -7,11 +7,11 @@ const bcrypt = require('bcrypt-nodejs')
 const UserSchema = new Schema({
   email: { type: String, unique: true, lowercase: true },
   name: String,
-  password: { type: String, select: false },
+  password: String,
   phoneNumber: String
 })
 
-UserSchema.pre('save', (next) => {
+UserSchema.pre('save', function (next) {
   let user = this
   if (!user.isModified('password')) return next()
 
