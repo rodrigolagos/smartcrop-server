@@ -27,8 +27,10 @@ function createPot (req, res) {
   console.log(req.body)
 
   let pot = Pot()
-  pot.name = req.body.name
-  pot.description = req.body.description
+  pot.humidity = req.body.humidity
+  pot.moisture = req.body.moisture
+  pot.roomTemperature = req.body.roomTemperature
+  pot.temperature = req.body.temperature
 
   pot.save((err, potStored) => {
     if (err) return res.status(500).send({ message: `Error al guardar pot: ${err}` })
@@ -39,6 +41,11 @@ function createPot (req, res) {
 function updatePot (req, res) {
   let potId = req.params.potId
   let update = req.body
+
+  if (update.watchers !== undefined) {
+    update['$addToSet'] = { watchers: update.watchers }
+    delete update['watchers']
+  }
 
   Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
