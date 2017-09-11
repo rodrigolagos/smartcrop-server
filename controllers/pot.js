@@ -72,10 +72,40 @@ function deletePot (req, res) {
   })
 }
 
+function getPotsByOwner (req, res) {
+  let userId = req.params.userId
+
+  Pot.find({ 'owner': userId }, function (err, pots) {
+    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+    if (!pots) return res.status(404).send({ message: 'No existen pots' })
+
+    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
+      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      res.status(200).send({pots})
+    })
+  })
+}
+
+function getPotsByWatcher (req, res) {
+  let userId = req.params.userId
+
+  Pot.find({ watchers: userId }, function (err, pots) {
+    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+    if (!pots) return res.status(404).send({ message: 'No existen pots' })
+
+    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
+      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      res.status(200).send({pots})
+    })
+  })
+}
+
 module.exports = {
   getPot,
   getPots,
   createPot,
   updatePot,
-  deletePot
+  deletePot,
+  getPotsByOwner,
+  getPotsByWatcher
 }
