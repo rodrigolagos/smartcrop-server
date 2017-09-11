@@ -11,6 +11,9 @@ api.get('/pots/:potId', potController.getPot)
 api.post('/pots', potController.createPot)
 api.put('/pots/:potId', potController.updatePot)
 api.delete('/pots/:potId', potController.deletePot)
+
+api.get('/users', userController.getUsers)
+api.get('/users/:userId', userController.getUser)
 api.post('/signup', userController.signUp)
 api.post('/signin', userController.signIn)
 api.get('/private', auth.isAuth, (req, res) => {
