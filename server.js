@@ -12,7 +12,7 @@ mongoose.connect(config.db, {useMongoClient: true}, (err, res) => {
 })
 
 io.on('connection', (socket) => {
-  console.log('Alguien se ha conectado')
+  console.log(`Alguien se ha conectado. Socket id: ${socket.id}`)
 
   socket.emit('welcome', { message: 'Bienvenido a Smartcrop' })
 
@@ -22,6 +22,10 @@ io.on('connection', (socket) => {
 
   socket.on('action bomb', (data) => {
     io.sockets.emit('bomb', data)
+  })
+
+  socket.on('disconnect', () => {
+    console.log(`El cliente ${socket.id} se ha desconectado.`)
   })
 })
 

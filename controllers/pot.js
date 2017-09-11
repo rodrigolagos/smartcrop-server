@@ -1,6 +1,7 @@
 'use strict'
 
 const Pot = require('../models/pot')
+const User = require('../models/user')
 
 function getPot (req, res) {
   let potId = req.params.potId
@@ -9,7 +10,10 @@ function getPot (req, res) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!pot) return res.status(404).send({ message: 'El pot no existe' })
 
-    res.status(200).send({ pot })
+    User.populate(pot, [{ path: 'watchers' }, { path: 'owner' }], function (err, pot) {
+      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      res.status(200).send({pot})
+    })
   })
 }
 
@@ -18,7 +22,10 @@ function getPots (req, res) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!pots) return res.status(404).send({ message: 'No existen pots' })
 
-    res.status(200).send({ pots })
+    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
+      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      res.status(200).send({pots})
+    })
   })
 }
 
