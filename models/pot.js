@@ -9,7 +9,11 @@ const PotSchema = Schema({
   roomTemperature: {type: Number, default: 0},
   temperature: {type: Number, default: 0},
   owner: {type: Schema.ObjectId, ref: 'User'},
-  watchers: [{type: Schema.ObjectId, ref: 'User'}]
+  watchers: [{type: Schema.ObjectId, ref: 'User'}],
+  requests: [{
+    userId: { type: Schema.ObjectId, ref: 'User' },
+    status: { type: String, enum: ['on hold', 'accepted', 'rejected'], default: 'on hold' }
+  }]
 })
 
 module.exports = mongoose.model('Pot', PotSchema)
