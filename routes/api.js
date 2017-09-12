@@ -14,6 +14,8 @@ api.delete('/pots/:potId', potController.deletePot)
 api.get('/users/:userId/owner/pots', potController.getPotsByOwner)
 api.get('/users/:userId/watcher/pots', potController.getPotsByWatcher)
 
+api.put('/pots/:potId/requests/:requestId', potController.updateRequestStatus)
+
 api.get('/users', userController.getUsers)
 api.get('/users/:userId', userController.getUser)
 api.post('/signup', userController.signUp)

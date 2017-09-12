@@ -103,7 +103,7 @@ function getPotsByOwner (req, res) {
 
   Pot.find({ 'owner': userId }, function (err, pots) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!pots) return res.status(404).send({ message: 'No existen pots' })
+    if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
 
     User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
@@ -117,12 +117,24 @@ function getPotsByWatcher (req, res) {
 
   Pot.find({ watchers: userId }, function (err, pots) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!pots) return res.status(404).send({ message: 'No existen pots' })
+    if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
 
     User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
       res.status(200).send({pots})
     })
+  })
+}
+
+function updateRequestStatus (req, res) {
+  let potId = req.params.potId
+  let requestId = req.params.requestId
+  let update = req.body
+
+  Pot.findOneAndUpdate({_id: potId, 'requests._id': requestId}, {$set: {'requests.$.status': update.status}}, { new: true }, (err, potUpdated) => {
+    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+    console.log(potUpdated)
+    res.status(200).send({ pot: potUpdated })
   })
 }
 
@@ -133,5 +145,6 @@ module.exports = {
   updatePot,
   deletePot,
   getPotsByOwner,
-  getPotsByWatcher
+  getPotsByWatcher,
+  updateRequestStatus
 }
