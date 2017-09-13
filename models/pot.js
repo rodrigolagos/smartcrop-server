@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const PotSchema = Schema({
+  name: {type: String, default: 'Maceta'},
   humidity: {type: Number, default: 0},
   moisture: {type: Number, default: 0},
   roomTemperature: {type: Number, default: 0},
