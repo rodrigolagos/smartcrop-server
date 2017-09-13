@@ -8,12 +8,30 @@
 </head>
 <body>
   <h1>Smartcrop</h1>
-  <h3>Humedad: <span id="humidity-value"></span></h3>
+  <h3>Humedad del ambiente: <span id="humidity-value"></span></h3>
+  <h3>Humedad de la tierra: <span id="moisture-value"></span></h3>
+  <h3>Temperatura del ambiente: <span id="room-temperature-value"></span></h3>
+  <h3>Temperatura de la tierra: <span id="temperature-value"></span></h3>
 
   <form onsubmit="return changeHumidity(this)">
-    <input id="humidityInput" type="text" name="" value="" placeholder="Humedad">
+    <input id="humidityInput" type="text" name="" value="" placeholder="Humedad del ambiente">
     <input type="submit" name="" value="Enviar">
-  </form>
+  </form><br>
+
+  <form onsubmit="return changeMoisture(this)">
+    <input id="moistureInput" type="text" name="" value="" placeholder="Humedad de la tierra">
+    <input type="submit" name="" value="Enviar">
+  </form><br>
+
+  <form onsubmit="return changeRoomTemperature(this)">
+    <input id="roomTemperatureInput" type="text" name="" value="" placeholder="Temperatura del ambiente">
+    <input type="submit" name="" value="Enviar">
+  </form><br>
+
+  <form onsubmit="return changeTemperature(this)">
+    <input id="temperatureInput" type="text" name="" value="" placeholder="Temperatura de la tierra">
+    <input type="submit" name="" value="Enviar">
+  </form><br>
 
   <form onsubmit="return activateBomb(this)">
     <input type="submit" name="bomba" value="Encender Bomba">

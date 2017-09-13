@@ -20,6 +20,18 @@ io.on('connection', (socket) => {
     io.sockets.emit('humidity', data)
   })
 
+  socket.on('change moisture', (data) => {
+    io.sockets.emit('moisture', data)
+  })
+
+  socket.on('change room temperature', (data) => {
+    io.sockets.emit('room temperature', data)
+  })
+
+  socket.on('change temperature', (data) => {
+    io.sockets.emit('temperature', data)
+  })
+
   socket.on('action bomb', (data) => {
     io.sockets.emit('bomb', data)
   })
