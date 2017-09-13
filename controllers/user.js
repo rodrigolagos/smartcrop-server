@@ -51,6 +51,7 @@ function signIn (req, res) {
       req.user = user
       res.status(200).send({
         message: 'Logueado correctamente',
+        user: user,
         token: tokenService.createToken(user)
       })
     })
