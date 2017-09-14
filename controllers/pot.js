@@ -67,7 +67,7 @@ function updatePot (req, res) {
       if (err) return res.status(500).send({ status_code: 500, message: `Error al realizar petición: ${err}` })
       if (!pot) return res.status(404).send({ status_code: 404, message: 'El macetero no existe' })
 
-      if (pot.owner !== undefined) {
+      if (pot.owner !== undefined && pot.owner !== null) {
         if (pot.owner.toString() === update.owner) {
           delete update['owner']
           return res.status(202).send({ status_code: 202, message: 'Ya eres dueño u observador de este macetero' })
