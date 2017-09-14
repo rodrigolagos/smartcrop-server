@@ -1,10 +1,19 @@
 'use strict'
 
+const mongoose = require('mongoose')
 const Pot = require('../models/pot')
 const User = require('../models/user')
+const FCM = require('fcm-push')
+
+const serverKey = 'AAAAzN3W5Fg:APA91bH3AELfl3fd_HzADede2jhqMfVM4iGu9AakLuZOvWoQ2iQPTPrE30TwHw8Fgjj2mZ6bPPVfNQVPHyzurvUEWzGkGGCSn-wrqmOvzjPss3OPdSehCsd6MVnULVXCP1V4LnVdGD1Z'
+const fcm = new FCM(serverKey)
 
 function getPot (req, res) {
   let potId = req.params.potId
+
+  if (!mongoose.Types.ObjectId.isValid(potId)) {
+    return res.status(404).send({ message: 'El pot no existe' })
+  }
 
   Pot.findById(potId, (err, pot) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
@@ -49,6 +58,10 @@ function updatePot (req, res) {
   let potId = req.params.potId
   let update = req.body
 
+  if (!mongoose.Types.ObjectId.isValid(potId)) {
+    return res.status(404).send({ message: 'El pot no existe' })
+  }
+
   if (update.owner !== undefined) {
     Pot.findById(potId, (err, pot) => {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
@@ -76,6 +89,23 @@ function updatePot (req, res) {
   } else {
     Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      if (potUpdated.humidity > 60) {
+        let message = {
+          to: '/topics/demo',
+          notification: {
+            title: 'Humedad muy alta',
+            body: 'La humedad en tu macetero es de ' + potUpdated.humidity + '%',
+            sound: true
+          }
+        }
+        fcm.send(message, function (err, response) {
+          if (err) {
+            console.log('Something has gone wrong!')
+          } else {
+            console.log('Successfully sent with response: ', response)
+          }
+        })
+      }
       res.status(200).send({ pot: potUpdated })
     })
   }
