@@ -27,14 +27,10 @@ function getPot (req, res) {
 }
 
 function getPots (req, res) {
-  Pot.find({}, (err, pots) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!pots) return res.status(404).send({ message: 'No existen pots' })
-
-    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
-      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      res.status(200).send({pots})
-    })
+  Pot.find({}, '-__v', (err, pots) => {
+    if (err) return res.status(500).send({ message: 'Error al realizar petición.', errorMessage: err })
+    if (!pots.length) return res.status(200).send({ message: 'No existen pots' })
+    res.status(200).send(pots)
   })
 }
 
