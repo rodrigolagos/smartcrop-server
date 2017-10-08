@@ -15,13 +15,13 @@ function getPot (req, res) {
     return res.status(404).send({ message: 'El pot no existe' })
   }
 
-  Pot.findById(potId, (err, pot) => {
+  Pot.findById(potId, '-__v', (err, pot) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!pot) return res.status(404).send({ message: 'El pot no existe' })
 
-    User.populate(pot, [{ path: 'watchers' }, { path: 'owner' }], function (err, pot) {
+    User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pot) {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      res.status(200).send({pot})
+      res.status(200).send(pot)
     })
   })
 }
@@ -46,7 +46,7 @@ function createPot (req, res) {
 
   pot.save((err, potStored) => {
     if (err) return res.status(500).send({ message: `Error al guardar pot: ${err}` })
-    res.status(200).send({ pot: potStored })
+    res.status(200).send(potStored)
   })
 }
 
@@ -55,32 +55,32 @@ function updatePot (req, res) {
   let update = req.body
 
   if (!mongoose.Types.ObjectId.isValid(potId)) {
-    return res.status(404).send({ status_code: 404, message: 'El pot no existe' })
+    return res.status(404).send({ message: 'El pot no existe' })
   }
 
   if (update.owner !== undefined) {
     Pot.findById(potId, (err, pot) => {
-      if (err) return res.status(500).send({ status_code: 500, message: `Error al realizar petición: ${err}` })
-      if (!pot) return res.status(404).send({ status_code: 404, message: 'El macetero no existe' })
+      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      if (!pot) return res.status(404).send({ message: 'El macetero no existe' })
 
       if (pot.owner !== undefined && pot.owner !== null) {
         if (pot.owner.toString() === update.owner) {
           delete update['owner']
-          return res.status(202).send({ status_code: 202, message: 'Ya eres dueño u observador de este macetero' })
+          return res.status(202).send({ message: 'Ya eres dueño u observador de este macetero' })
         } else {
           let watchers = pot.watchers.toString()
           if (watchers.indexOf(update.owner) === -1) {
             update['$addToSet'] = { watchers: update.owner }
             delete update['owner']
           } else {
-            return res.status(202).send({ status_code: 202, message: 'Ya eres dueño u observador de este macetero' })
+            return res.status(202).send({ message: 'Ya eres dueño u observador de este macetero' })
           }
         }
       }
 
       Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
         if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-        res.status(200).send({ status_code: 200, message: 'Macetero actualizado correctamente', pot: potUpdated })
+        res.status(200).send({ message: 'Macetero actualizado correctamente', pot: potUpdated })
       })
     })
   } else {
@@ -103,7 +103,7 @@ function updatePot (req, res) {
           }
         })
       }
-      res.status(200).send({ pot: potUpdated })
+      res.status(200).send(potUpdated)
     })
   }
 
@@ -163,9 +163,9 @@ function getPotsByOwner (req, res) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
 
-    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
+    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      res.status(200).send({pots})
+      res.status(200).send(pots)
     })
   })
 }
@@ -177,9 +177,9 @@ function getPotsByWatcher (req, res) {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
 
-    User.populate(pots, [{ path: 'watchers' }, { path: 'owner' }], function (err, pots) {
+    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      res.status(200).send({pots})
+      res.status(200).send(pots)
     })
   })
 }
@@ -192,7 +192,7 @@ function updateRequestStatus (req, res) {
   Pot.findOneAndUpdate({_id: potId, 'requests._id': requestId}, {$set: {'requests.$.status': update.status}}, { new: true }, (err, potUpdated) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     console.log(potUpdated)
-    res.status(200).send({ pot: potUpdated })
+    res.status(200).send(potUpdated)
   })
 }
 

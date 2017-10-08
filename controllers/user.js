@@ -7,20 +7,20 @@ const bcrypt = require('bcrypt-nodejs')
 function getUser (req, res) {
   let userId = req.params.userId
 
-  User.findById(userId, (err, user) => {
+  User.findById(userId, '-__v -password', (err, user) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!user) return res.status(404).send({ message: 'El usuario no existe' })
 
-    res.status(200).send({ user })
+    res.status(200).send(user)
   })
 }
 
 function getUsers (req, res) {
-  User.find({}, (err, users) => {
+  User.find({}, '-__v -password', (err, users) => {
     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
     if (!users) return res.status(404).send({ message: 'No existen usuarios' })
 
-    res.status(200).send({ users })
+    res.status(200).send(users)
   })
 }
 
@@ -35,7 +35,7 @@ function signUp (req, res) {
   user.save((err) => {
     if (err) return res.status(500).send({message: `Error al crear usuario: ${err}`})
 
-    return res.status(200).send({message: 'Usuario creado correctamente', user: user, token: tokenService.createToken(user)})
+    return res.status(201).send({message: 'Usuario creado correctamente'})
   })
 }
 
@@ -51,7 +51,6 @@ function signIn (req, res) {
       req.user = user
       res.status(200).send({
         message: 'Logueado correctamente',
-        user: user,
         token: tokenService.createToken(user)
       })
     })
