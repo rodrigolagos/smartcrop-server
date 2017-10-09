@@ -12,7 +12,7 @@ const PotSchema = Schema({
   owner: {type: Schema.ObjectId, ref: 'User'},
   watchers: [{type: Schema.ObjectId, ref: 'User'}],
   requests: [{
-    userId: { type: Schema.ObjectId, ref: 'User' },
+    user: { type: Schema.ObjectId, ref: 'User' },
     status: { type: String, enum: ['on hold', 'accepted', 'rejected'], default: 'on hold' }
   }]
 })

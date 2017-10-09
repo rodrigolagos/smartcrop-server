@@ -59,29 +59,53 @@ function updatePot (req, res) {
 
   if (update.owner !== undefined) {
     // verificar si owner es objectid y  si existe
-    Pot.findById(potId, (err, pot) => {
-      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      if (!pot) return res.status(404).send({ message: 'El macetero no existe' })
+    if (!mongoose.Types.ObjectId.isValid(update.owner)) {
+      return res.status(400).send({ message: 'El usuario no existe', code: 400 })
+    }
 
-      if (pot.owner !== undefined && pot.owner !== null) {
-        if (pot.owner.toString() === update.owner) {
-          delete update['owner']
-          return res.status(202).send({ message: 'Ya eres dueño u observador de este macetero' })
-        } else {
-          let watchers = pot.watchers.toString()
-          if (watchers.indexOf(update.owner) === -1) {
-            update['$addToSet'] = { watchers: update.owner }
-            delete update['owner']
-          } else {
-            return res.status(202).send({ message: 'Ya eres dueño u observador de este macetero' })
+    User.count({_id: update.owner}, function (err, count) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      if (count > 0) {
+        Pot.findById(potId, (err, pot) => {
+          if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+          if (!pot) return res.status(404).send({ message: 'El macetero no existe', code: 404 })
+
+          if (pot.owner !== undefined && pot.owner !== null) {
+            if (pot.owner.toString() === update.owner) {
+              delete update['owner']
+              return res.status(403).send({ message: 'Ya eres dueño de este macetero', code: 4031 })
+            } else {
+              let watchers = pot.watchers.toString()
+              let usersInRequests = []
+
+              for (var i = 0; i < (pot.requests).length; i++) {
+                usersInRequests.push(pot.requests[i].user.toString())
+              }
+              if (watchers.indexOf(update.owner) === -1) {
+                if (usersInRequests.indexOf(update.owner) === -1) {
+                  update['$push'] = { requests: { user: update.owner } }
+                  delete update['owner']
+                } else {
+                  return res.status(403).send({ message: 'Ya tienes una solicitud pendiente', code: 4033 })
+                }
+              } else {
+                return res.status(403).send({ message: 'Ya eres observador de este macetero', code: 4032 })
+              }
+            }
           }
-        }
-      }
 
-      Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
-        if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-        res.status(200).send({ message: 'Macetero actualizado correctamente', pot: potUpdated })
-      })
+          Pot.findByIdAndUpdate(potId, update, { fields: '-__v', new: true }, (err, potUpdated) => {
+            if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+            User.populate(potUpdated, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
+              if (err) return res.status(500).send({ message: err.message, code: err.code })
+              res.status(200).send({ message: 'Macetero actualizado correctamente', pot: potUpdated })
+            })
+          })
+        })
+      } else {
+        return res.status(400).send({ message: 'El usuario no existe', code: 400 })
+      }
     })
   } else {
     Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
