@@ -19,7 +19,7 @@ function getPot (req, res) {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
     if (!pot) return res.status(404).send({ message: 'El pot no existe', code: 404 })
 
-    User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pot) {
+    User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pot)
     })
@@ -130,42 +130,6 @@ function updatePot (req, res) {
       res.status(200).send(potUpdated)
     })
   }
-
-  // if (update.watchers !== undefined) {
-  //   update['$addToSet'] = { watchers: update.watchers }
-  //   delete update['watchers']
-  // }
-
-  // if (update.requests !== undefined) {
-  //   Pot.findById(potId, (err, pot) => {
-  //     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-  //     if (!pot) return res.status(404).send({ message: 'El pot no existe' })
-  //
-  //     let watchers = pot.watchers.toString()
-  //     let usersInRequests = []
-  //
-  //     for (var i = 0; i < (pot.requests).length; i++) {
-  //       usersInRequests.push(pot.requests[i].userId.toString())
-  //     }
-  //
-  //     if (pot.owner.toString() !== update.requests && watchers.indexOf(update.requests) === -1 && usersInRequests.indexOf(update.requests) === -1) {
-  //       update['$push'] = { requests: { userId: update.requests } }
-  //       delete update['requests']
-  //     } else {
-  //       delete update['requests']
-  //     }
-  //
-  //     Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
-  //       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-  //       res.status(200).send({ pot: potUpdated })
-  //     })
-  //   })
-  // } else {
-  //   Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
-  //     if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-  //     res.status(200).send({ pot: potUpdated })
-  //   })
-  // }
 }
 
 function deletePot (req, res) {
