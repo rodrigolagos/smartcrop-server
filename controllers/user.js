@@ -8,8 +8,8 @@ function getUser (req, res) {
   let userId = req.params.userId
 
   User.findById(userId, '-__v -password', (err, user) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!user) return res.status(404).send({ message: 'El usuario no existe' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!user) return res.status(404).send({ message: 'El usuario no existe', code: 404 })
 
     res.status(200).send(user)
   })
@@ -17,8 +17,7 @@ function getUser (req, res) {
 
 function getUsers (req, res) {
   User.find({}, '-__v -password', (err, users) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!users) return res.status(404).send({ message: 'No existen usuarios' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
 
     res.status(200).send(users)
   })
@@ -33,20 +32,27 @@ function signUp (req, res) {
   })
 
   user.save((err) => {
-    if (err) return res.status(500).send({message: `Error al crear usuario: ${err}`})
-
-    return res.status(201).send({message: 'Usuario creado correctamente'})
+    if (err) {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: err.message, code: 400 })
+      }
+      if (err.code === 11000) {
+        return res.status(409).send({ message: 'Email already exists', code: 409 })
+      }
+      return res.status(500).send({ message: err.code })
+    }
+    return res.status(201).send({ message: 'Usuario creado correctamente' })
   })
 }
 
 function signIn (req, res) {
   User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) return res.status(500).send({message: err})
-    if (!user) return res.status(404).send({message: 'No existe el usuario'})
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!user) return res.status(404).send({message: 'No existe el usuario', code: 404})
 
     bcrypt.compare(req.body.password, user.password, (err, result) => {
-      if (err) return err
-      if (!result) return res.status(401).send({message: 'Usuario o contraseña incorrectos'})
+      if (err) return res.status(500).send({message: err.message})
+      if (!result) return res.status(401).send({message: 'Usuario o contraseña incorrectos', code: 401})
 
       req.user = user
       res.status(200).send({
@@ -57,9 +63,33 @@ function signIn (req, res) {
   })
 }
 
+function getMyProfile (req, res) {
+  if (!req.headers.authorization) {
+    return res.status(403).send({message: 'Sin autorización'})
+  }
+
+  const token = req.headers.authorization.split(' ')[1]
+
+  tokenService.decodeToken(token)
+    .then(response => {
+      let userId = response
+
+      User.findById(userId, '-__v -password', (err, user) => {
+        if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+        if (!user) return res.status(404).send({ message: 'El usuario no existe' })
+
+        res.status(200).send(user)
+      })
+    })
+    .catch(response => {
+      res.status(response.status).send({message: response.message})
+    })
+}
+
 module.exports = {
   signUp,
   signIn,
   getUsers,
-  getUser
+  getUser,
+  getMyProfile
 }

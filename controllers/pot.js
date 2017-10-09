@@ -12,15 +12,15 @@ function getPot (req, res) {
   let potId = req.params.potId
 
   if (!mongoose.Types.ObjectId.isValid(potId)) {
-    return res.status(404).send({ message: 'El pot no existe' })
+    return res.status(404).send({ message: 'El pot no existe', code: 404 })
   }
 
   Pot.findById(potId, '-__v', (err, pot) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (!pot) return res.status(404).send({ message: 'El pot no existe' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!pot) return res.status(404).send({ message: 'El pot no existe', code: 404 })
 
     User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pot) {
-      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pot)
     })
   })
@@ -28,8 +28,7 @@ function getPot (req, res) {
 
 function getPots (req, res) {
   Pot.find({}, '-__v', (err, pots) => {
-    if (err) return res.status(500).send({ message: 'Error al realizar petición.', errorMessage: err })
-    if (!pots.length) return res.status(200).send({ message: 'No existen pots' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
     res.status(200).send(pots)
   })
 }
@@ -45,8 +44,8 @@ function createPot (req, res) {
   pot.temperature = req.body.temperature
 
   pot.save((err, potStored) => {
-    if (err) return res.status(500).send({ message: `Error al guardar pot: ${err}` })
-    res.status(200).send(potStored)
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    res.status(201).send(potStored)
   })
 }
 
@@ -55,10 +54,11 @@ function updatePot (req, res) {
   let update = req.body
 
   if (!mongoose.Types.ObjectId.isValid(potId)) {
-    return res.status(404).send({ message: 'El pot no existe' })
+    return res.status(404).send({ message: 'El pot no existe', code: 404 })
   }
 
   if (update.owner !== undefined) {
+    // verificar si owner es objectid y  si existe
     Pot.findById(potId, (err, pot) => {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
       if (!pot) return res.status(404).send({ message: 'El macetero no existe' })
@@ -148,9 +148,9 @@ function deletePot (req, res) {
   let potId = req.params.potId
 
   Pot.findById(potId, (err, pot) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
     pot.remove(err => {
-      if (err) return res.status(500).send({ message: `Error al borrar pot: ${err}` })
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send({ message: 'El pot ha sido eliminado' })
     })
   })
@@ -160,11 +160,10 @@ function getPotsByOwner (req, res) {
   let userId = req.params.userId
 
   Pot.find({ 'owner': userId }, function (err, pots) {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
 
     User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
-      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pots)
     })
   })
@@ -174,11 +173,10 @@ function getPotsByWatcher (req, res) {
   let userId = req.params.userId
 
   Pot.find({ watchers: userId }, function (err, pots) {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-    if (pots.length === 0) return res.status(404).send({ message: 'No existen pots' })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
 
     User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
-      if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pots)
     })
   })
@@ -190,7 +188,7 @@ function updateRequestStatus (req, res) {
   let update = req.body
 
   Pot.findOneAndUpdate({_id: potId, 'requests._id': requestId}, {$set: {'requests.$.status': update.status}}, { new: true }, (err, potUpdated) => {
-    if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
     console.log(potUpdated)
     res.status(200).send(potUpdated)
   })

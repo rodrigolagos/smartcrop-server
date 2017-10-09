@@ -67,5 +67,6 @@ api.post('/signin', userController.signIn)
 api.get('/private', auth.isAuth, (req, res) => {
   res.status(200).send({message: `User: ${req.user} Autorizado`})
 })
+api.get('/me', userController.getMyProfile)
 
 module.exports = api
