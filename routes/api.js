@@ -14,6 +14,7 @@ api.delete('/pots/:potId', potController.deletePot)
 api.get('/users/:userId/owner/pots', potController.getPotsByOwner)
 api.get('/users/:userId/watcher/pots', potController.getPotsByWatcher)
 
+api.get('/pots/:potId/requests', potController.getRequests)
 api.put('/pots/:potId/requests/:requestId', potController.updateRequestStatus)
 
 api.get('/users/:userId/invitations', userController.getInvitations)

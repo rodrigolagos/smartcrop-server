@@ -149,7 +149,7 @@ function getPotsByOwner (req, res) {
   Pot.find({ 'owner': userId }, function (err, pots) {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
 
-    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
+    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pots)
     })
@@ -162,9 +162,22 @@ function getPotsByWatcher (req, res) {
   Pot.find({ watchers: userId }, function (err, pots) {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
 
-    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }], function (err, pots) {
+    User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
       res.status(200).send(pots)
+    })
+  })
+}
+
+function getRequests (req, res) {
+  let potId = req.params.potId
+  Pot.findById(potId, '-__v', (err, pot) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!pot) return res.status(404).send({ message: 'No existe el pot', code: 404 })
+
+    User.populate(pot, [{ path: 'requests.user', select: '-__v -password' }], function (err, pots) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(pot.requests)
     })
   })
 }
@@ -176,7 +189,21 @@ function updateRequestStatus (req, res) {
 
   Pot.findOneAndUpdate({_id: potId, 'requests._id': requestId}, {$set: {'requests.$.status': update.status}}, { new: true }, (err, potUpdated) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
-    res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+
+    if (update.status === 'accepted') {
+      let request = potUpdated.requests.filter(function (obj) {
+        return obj._id.toString() === requestId
+      })
+      let userId = request[0].user
+      update['$addToSet'] = { watchers: userId }
+      delete update['status']
+      Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+      })
+    } else {
+      res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+    }
   })
 }
 
@@ -188,5 +215,6 @@ module.exports = {
   deletePot,
   getPotsByOwner,
   getPotsByWatcher,
+  getRequests,
   updateRequestStatus
 }
