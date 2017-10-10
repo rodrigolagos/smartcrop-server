@@ -4,6 +4,8 @@ const express = require('express')
 const potController = require('../controllers/pot')
 const userController = require('../controllers/user')
 const auth = require('../middlewares/auth')
+const multer = require('multer')
+const upload = multer({ dest: 'public/uploads/' })
 const api = express.Router()
 
 api.get('/pots', potController.getPots)
@@ -23,9 +25,9 @@ api.put('/users/:userId/invitations/:invitationId', userController.updateInvitat
 
 api.get('/users', userController.getUsers)
 api.get('/users/:userId', userController.getUser)
-api.post('/signup', userController.signUp)
+api.post('/signup', upload.single('avatar'), userController.signUp)
 api.post('/signin', userController.signIn)
-api.put('/users/:userId', userController.updateUser)
+api.put('/users/:userId', upload.single('avatar'), userController.updateUser)
 api.delete('/users/:userId', userController.deleteUser)
 api.get('/private', auth.isAuth, (req, res) => {
   res.status(200).send({message: `User: ${req.user} Autorizado`})

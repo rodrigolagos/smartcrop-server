@@ -32,6 +32,10 @@ function signUp (req, res) {
     nickname: req.body.nickname
   })
 
+  if (req.file !== undefined) {
+    user.avatar = req.file.filename + '.png'
+  }
+
   user.save((err) => {
     if (err) {
       if (err.name === 'ValidationError') {
@@ -71,6 +75,10 @@ function signIn (req, res) {
 function updateUser (req, res) {
   let userId = req.params.userId
   let update = req.body
+
+  if (req.file !== undefined) {
+    update.avatar = req.file.filename + '.png'
+  }
 
   User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
     if (err) {
