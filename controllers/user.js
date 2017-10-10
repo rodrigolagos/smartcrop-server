@@ -33,7 +33,7 @@ function signUp (req, res) {
   })
 
   if (req.file !== undefined) {
-    user.avatar = req.file.filename + '.png'
+    user.avatar = req.file.filename
   }
 
   user.save((err) => {
@@ -77,7 +77,7 @@ function updateUser (req, res) {
   let update = req.body
 
   if (req.file !== undefined) {
-    update.avatar = req.file.filename + '.png'
+    update.avatar = req.file.filename
   }
 
   User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
