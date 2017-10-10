@@ -27,8 +27,8 @@ function signUp (req, res) {
   const user = new User({
     email: req.body.email,
     name: req.body.name,
-    phoneNumber: req.body.phoneNumber,
-    password: req.body.password
+    password: req.body.password,
+    nickname: req.body.nickname
   })
 
   user.save((err) => {
@@ -37,7 +37,11 @@ function signUp (req, res) {
         return res.status(400).send({ message: err.message, code: 400 })
       }
       if (err.code === 11000) {
-        return res.status(409).send({ message: 'Email already exists', code: 409 })
+        // email or nickname could violate the unique index. we need to find out which field it was.
+        var field = err.message.split('index: ')[1]
+        field = field.split(' dup key')[0]
+        field = field.substring(0, field.lastIndexOf('_'))
+        return res.status(409).send({ message: field + ' already exists.', code: 409 })
       }
       return res.status(500).send({ message: err.code })
     }

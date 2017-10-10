@@ -8,7 +8,8 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, lowercase: true, required: true },
   name: { type: String, required: true },
   password: { type: String, required: true },
-  phoneNumber: String
+  nickname: { type: String, unique: true, required: true },
+  avatar: { type: String, default: 'default.jpg' }
 })
 
 UserSchema.pre('save', function (next) {
