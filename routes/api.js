@@ -37,6 +37,7 @@ api.put('/users/:userId/invitations/:invitationId', userController.updateInvitat
 
 api.get('/users', userController.getUsers)
 api.get('/users/:userId', userController.getUser)
+api.get('/users/search/:userEmailOrNickname', userController.getUserByEmailOrNickname)
 api.post('/signup', upload.single('avatar'), userController.signUp)
 api.post('/signin', userController.signIn)
 api.put('/users/:userId', upload.single('avatar'), userController.updateUser)

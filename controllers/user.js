@@ -16,6 +16,19 @@ function getUser (req, res) {
   })
 }
 
+function getUserByEmailOrNickname (req, res) {
+  let userEmailOrNickname = req.params.userEmailOrNickname
+
+  let query = {$or: [{email: {$regex: userEmailOrNickname, $options: 'i'}}, {nickname: {$regex: userEmailOrNickname, $options: 'i'}}]}
+
+  User.find(query, '-__v -password', (err, users) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!users) return res.status(404).send({ message: 'El usuario no existe', code: 404 })
+
+    res.status(200).send(users)
+  })
+}
+
 function getUsers (req, res) {
   User.find({}, '-__v -password', (err, users) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
@@ -46,7 +59,11 @@ function signUp (req, res) {
         var field = err.message.split('index: ')[1]
         field = field.split(' dup key')[0]
         field = field.substring(0, field.lastIndexOf('_'))
-        return res.status(409).send({ message: field + ' already exists.', code: 409 })
+        if (field === 'email') {
+          return res.status(409).send({ message: field + ' already exists.', code: 4091 })
+        } else {
+          return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+        }
       }
       return res.status(500).send({ message: err.code })
     }
@@ -90,7 +107,11 @@ function updateUser (req, res) {
         var field = err.message.split('index: ')[1]
         field = field.split(' dup key')[0]
         field = field.substring(0, field.lastIndexOf('_'))
-        return res.status(409).send({ message: field + ' already exists.', code: 409 })
+        if (field === 'email') {
+          return res.status(409).send({ message: field + ' already exists.', code: 4091 })
+        } else {
+          return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+        }
       }
       return res.status(500).send({ message: err.code })
     }
@@ -206,6 +227,7 @@ module.exports = {
   signIn,
   getUsers,
   getUser,
+  getUserByEmailOrNickname,
   updateUser,
   deleteUser,
   getMyProfile,
