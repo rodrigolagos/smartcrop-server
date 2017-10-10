@@ -58,7 +58,6 @@ function updatePot (req, res) {
   }
 
   if (update.owner !== undefined) {
-    // verificar si owner es objectid y  si existe
     if (!mongoose.Types.ObjectId.isValid(update.owner)) {
       return res.status(400).send({ message: 'El usuario no existe', code: 400 })
     }
@@ -177,8 +176,7 @@ function updateRequestStatus (req, res) {
 
   Pot.findOneAndUpdate({_id: potId, 'requests._id': requestId}, {$set: {'requests.$.status': update.status}}, { new: true }, (err, potUpdated) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
-    console.log(potUpdated)
-    res.status(200).send(potUpdated)
+    res.status(200).send({ message: 'Estado de la solicitud actualizado' })
   })
 }
 
