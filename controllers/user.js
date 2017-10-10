@@ -68,6 +68,29 @@ function signIn (req, res) {
   })
 }
 
+function updateUser (req, res) {
+  let userId = req.params.userId
+  let update = req.body
+
+  User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
+    if (err) {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: err.message, code: 400 })
+      }
+      if (err.code === 11000) {
+        // email or nickname could violate the unique index. we need to find out which field it was.
+        var field = err.message.split('index: ')[1]
+        field = field.split(' dup key')[0]
+        field = field.substring(0, field.lastIndexOf('_'))
+        return res.status(409).send({ message: field + ' already exists.', code: 409 })
+      }
+      return res.status(500).send({ message: err.code })
+    }
+
+    res.status(200).send({ message: 'Usuario actualizado correctamente', user: userUpdated })
+  })
+}
+
 function deleteUser (req, res) {
   let userId = req.params.userId
 
@@ -175,6 +198,7 @@ module.exports = {
   signIn,
   getUsers,
   getUser,
+  updateUser,
   deleteUser,
   getMyProfile,
   createInvitation,
