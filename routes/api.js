@@ -25,6 +25,7 @@ api.get('/users', userController.getUsers)
 api.get('/users/:userId', userController.getUser)
 api.post('/signup', userController.signUp)
 api.post('/signin', userController.signIn)
+api.delete('/users/:userId', userController.deleteUser)
 api.get('/private', auth.isAuth, (req, res) => {
   res.status(200).send({message: `User: ${req.user} Autorizado`})
 })

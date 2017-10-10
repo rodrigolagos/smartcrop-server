@@ -68,6 +68,18 @@ function signIn (req, res) {
   })
 }
 
+function deleteUser (req, res) {
+  let userId = req.params.userId
+
+  User.findById(userId, (err, pot) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    pot.remove(err => {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send({ message: 'El usuario ha sido eliminado' })
+    })
+  })
+}
+
 function getMyProfile (req, res) {
   // Delete this verification and use auth middleware
   if (!req.headers.authorization) {
@@ -163,6 +175,7 @@ module.exports = {
   signIn,
   getUsers,
   getUser,
+  deleteUser,
   getMyProfile,
   createInvitation,
   getInvitations,
