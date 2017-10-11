@@ -225,30 +225,38 @@ function updateInvitationStatus (req, res) {
 
 function resetPassword (req, res) {
   let email = req.body.email
-  console.log(email)
   var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'lightup.utfsm@gmail.com', // Your email id
-      pass: 'LightUpUTFSM' // Your password
+      user: 'lightup.utfsm@gmail.com',
+      pass: 'LightUpUTFSM'
     }
   })
 
-  var mailOptions = {
-    from: 'Smartcrop <do-not-reply@lightup.cl>', // sender address
-    to: email, // list of receivers
-    subject: 'Email Example', // Subject line
-    text: 'Hello world from Smartcrop\n\n' //, // plaintext body
-    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
-  }
+  User.findOne({email: email}, (err, user) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!user) return res.status(404).send({ message: 'El usuario no existe', code: 404 })
 
-  transporter.sendMail(mailOptions, function (err, info) {
-    if (err) {
-      return res.status(500).send({ message: err.message, code: err.code })
-    } else {
-      console.log('Message sent: ' + info.response)
-      res.status(200).send({ message: 'Email enviado' })
-    }
+    let newPassword = Math.random().toString(36).slice(-8)
+    user.password = newPassword
+
+    user.save((err) => {
+      if (err) return res.status(500).send({ message: err.code })
+      var mailOptions = {
+        from: 'Smartcrop <do-not-reply@lightup.cl>',
+        to: email,
+        subject: 'Contraseña reestablecida',
+        html: '<h3>Su contraseña en Smartcrop ha sido reestablecida</h3><br><p>Su nueva contraseña es: <b>' + newPassword + '</b></p><br><p>Por su seguridad, le recomendamos cambiar esta contraseña una vez ingresado al sistema.</p><br>Saludos,<br>El equipo de SmartCrop.'
+      }
+      transporter.sendMail(mailOptions, function (err, info) {
+        if (err) {
+          return res.status(500).send({ message: err.message, code: err.code })
+        } else {
+          console.log('Message sent: ' + info.response)
+          res.status(200).send({ message: 'Password reset and Email enviado' })
+        }
+      })
+    })
   })
 }
 
