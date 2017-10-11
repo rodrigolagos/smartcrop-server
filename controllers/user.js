@@ -102,39 +102,56 @@ function updateUser (req, res) {
     update.avatar = req.file.filename
   }
 
-  if (update.password !== undefined) {
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) return res.status(500).send({message: err.message})
+  if (update.newPassword !== undefined) {
+    if (update.password === undefined) {
+      return res.status(400).send({ message: 'Para cambiar contraseña debe ingresar contraseña actual', code: 4001 })
+    }
+    User.findOne({ _id: userId }, (err, user) => {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      if (!user) return res.status(404).send({message: 'No existe el usuario', code: 404})
 
-      bcrypt.hash(update.password, salt, null, (err, hash) => {
+      bcrypt.compare(update.password, user.password, (err, result) => {
         if (err) return res.status(500).send({message: err.message})
+        if (!result) return res.status(401).send({message: 'Contraseña actual incorrecta', code: 401})
 
-        update.password = hash
+        bcrypt.genSalt(10, (err, salt) => {
+          if (err) return res.status(500).send({message: err.message})
 
-        User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
-          if (err) {
-            if (err.name === 'ValidationError') {
-              return res.status(400).send({ message: err.message, code: 400 })
-            }
-            if (err.code === 11000) {
-              // email or nickname could violate the unique index. we need to find out which field it was.
-              var field = err.message.split('index: ')[1]
-              field = field.split(' dup key')[0]
-              field = field.substring(0, field.lastIndexOf('_'))
-              if (field === 'email') {
-                return res.status(409).send({ message: field + ' already exists.', code: 4091 })
-              } else {
-                return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+          bcrypt.hash(update.newPassword, salt, null, (err, hash) => {
+            if (err) return res.status(500).send({message: err.message})
+
+            update.password = hash
+            delete update['newPassword']
+
+            User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
+              if (err) {
+                if (err.name === 'ValidationError') {
+                  return res.status(400).send({ message: err.message, code: 400 })
+                }
+                if (err.code === 11000) {
+                  // email or nickname could violate the unique index. we need to find out which field it was.
+                  var field = err.message.split('index: ')[1]
+                  field = field.split(' dup key')[0]
+                  field = field.substring(0, field.lastIndexOf('_'))
+                  if (field === 'email') {
+                    return res.status(409).send({ message: field + ' already exists.', code: 4091 })
+                  } else {
+                    return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+                  }
+                }
+                return res.status(500).send({ message: err.code })
               }
-            }
-            return res.status(500).send({ message: err.code })
-          }
 
-          res.status(200).send({ message: 'Usuario actualizado correctamente', user: userUpdated })
+              res.status(200).send({ message: 'Usuario actualizado correctamente', user: userUpdated })
+            })
+          })
         })
       })
     })
   } else {
+    if (update.password !== undefined) {
+      delete update['password']
+    }
     User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
       if (err) {
         if (err.name === 'ValidationError') {
