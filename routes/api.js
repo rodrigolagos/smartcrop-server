@@ -40,6 +40,7 @@ api.get('/users/:userId', userController.getUser)
 api.get('/users/search/:userEmailOrNickname', userController.getUserByEmailOrNickname)
 api.post('/signup', upload.single('avatar'), userController.signUp)
 api.post('/signin', userController.signIn)
+api.post('/reset-password', userController.resetPassword)
 api.put('/users/:userId', upload.single('avatar'), userController.updateUser)
 api.delete('/users/:userId', userController.deleteUser)
 api.get('/private', auth.isAuth, (req, res) => {

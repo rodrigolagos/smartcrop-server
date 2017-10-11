@@ -4,6 +4,7 @@ const User = require('../models/user')
 const Pot = require('../models/pot')
 const tokenService = require('../services/token')
 const bcrypt = require('bcrypt-nodejs')
+const nodemailer = require('nodemailer')
 
 function getUser (req, res) {
   let userId = req.params.userId
@@ -222,6 +223,35 @@ function updateInvitationStatus (req, res) {
   })
 }
 
+function resetPassword (req, res) {
+  let email = req.body.email
+  console.log(email)
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'lightup.utfsm@gmail.com', // Your email id
+      pass: 'LightUpUTFSM' // Your password
+    }
+  })
+
+  var mailOptions = {
+    from: 'Smartcrop <do-not-reply@lightup.cl>', // sender address
+    to: email, // list of receivers
+    subject: 'Email Example', // Subject line
+    text: 'Hello world from Smartcrop\n\n' //, // plaintext body
+    // html: '<b>Hello world ✔</b>' // You can choose to send an HTML body instead
+  }
+
+  transporter.sendMail(mailOptions, function (err, info) {
+    if (err) {
+      return res.status(500).send({ message: err.message, code: err.code })
+    } else {
+      console.log('Message sent: ' + info.response)
+      res.status(200).send({ message: 'Email enviado' })
+    }
+  })
+}
+
 module.exports = {
   signUp,
   signIn,
@@ -233,5 +263,6 @@ module.exports = {
   getMyProfile,
   createInvitation,
   getInvitations,
-  updateInvitationStatus
+  updateInvitationStatus,
+  resetPassword
 }
