@@ -253,7 +253,7 @@ function resetPassword (req, res) {
           return res.status(500).send({ message: err.message, code: err.code })
         } else {
           console.log('Message sent: ' + info.response)
-          res.status(200).send({ message: 'Password reset and Email enviado' })
+          res.status(200).send({ message: 'Contraseña reestablecida y email enviado' })
         }
       })
     })
