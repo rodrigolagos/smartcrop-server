@@ -5,6 +5,10 @@ const Pot = require('../models/pot')
 const tokenService = require('../services/token')
 const bcrypt = require('bcrypt-nodejs')
 const nodemailer = require('nodemailer')
+const FCM = require('fcm-push')
+
+const serverKey = 'AAAAzN3W5Fg:APA91bH3AELfl3fd_HzADede2jhqMfVM4iGu9AakLuZOvWoQ2iQPTPrE30TwHw8Fgjj2mZ6bPPVfNQVPHyzurvUEWzGkGGCSn-wrqmOvzjPss3OPdSehCsd6MVnULVXCP1V4LnVdGD1Z'
+const fcm = new FCM(serverKey)
 
 function getUser (req, res) {
   let userId = req.params.userId
@@ -213,6 +217,23 @@ function createInvitation (req, res) {
 
         Pot.populate(userUpdated, [{ path: 'invitations.pot', select: '-__v' }], function (err, user) {
           if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+          let message = {
+            to: userUpdated.deviceToken,
+            notification: {
+              title: 'Nueva invitación',
+              body: 'Te han invitado a observar un macetero',
+              sound: true
+            }
+          }
+          fcm.send(message, function (err, response) {
+            if (err) {
+              console.log('Something has gone wrong while sending new invitation!')
+            } else {
+              console.log('Invitation successfully sent with response: ', response)
+            }
+          })
+
           res.status(200).send({ message: 'Usuario actualizado correctamente', user: userUpdated })
         })
       })

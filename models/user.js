@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   name: { type: String, required: true },
   password: { type: String, required: true },
   nickname: { type: String, unique: true, required: true },
+  deviceToken: String,
   avatar: { type: String, default: 'default.jpg' },
   invitations: [{
     pot: { type: Schema.ObjectId, ref: 'Pot' },
