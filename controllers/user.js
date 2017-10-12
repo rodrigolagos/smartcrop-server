@@ -178,9 +178,10 @@ function updateUser (req, res) {
 
 function updateUserAvatar (req, res) {
   let userId = req.params.userId
-  let update = req.body
-  console.log(req.file.filename)
+  let update = {}
+
   if (req.file !== undefined) {
+    update.avatar = req.file.filename
     User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
       if (err) {
         return res.status(500).send({ message: err.code })
