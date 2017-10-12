@@ -304,10 +304,60 @@ function updateInvitationStatus (req, res) {
       delete update['status']
       Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
         if (err) return res.status(500).send({ message: err.message, code: err.code })
-        res.status(200).send({ message: 'Estado de la invitación actualizado' })
+
+        User.populate(potUpdated, [{ path: 'owner', select: '-__v -password' }], function (err, pots) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+          let message = {
+            to: potUpdated.owner.deviceToken,
+            notification: {
+              title: 'Invitación aceptada',
+              body: 'Han aceptado tu invitación',
+              sound: true
+            }
+          }
+          fcm.send(message, function (err, response) {
+            if (err) {
+              console.log('Something has gone wrong while sending new invitation!')
+            } else {
+              console.log('Invitation successfully sent with response: ', response)
+            }
+          })
+
+          res.status(200).send({ message: 'Estado de la invitación actualizado' })
+        })
       })
     } else {
-      res.status(200).send({ message: 'Estado de la invitación actualizado' })
+      let invitation = userUpdated.invitations.filter(function (obj) {
+        return obj._id.toString() === invitationId
+      })
+      let potId = invitation[0].pot
+      delete update['status']
+      Pot.findById(potId, (err, pot) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+        User.populate(pot, [{ path: 'owner', select: '-__v -password' }], function (err, pots) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+          let message = {
+            to: pot.owner.deviceToken,
+            notification: {
+              title: 'Invitación rechazada',
+              body: 'No han aceptado tu invitación',
+              sound: true
+            }
+          }
+          fcm.send(message, function (err, response) {
+            if (err) {
+              console.log('Something has gone wrong while sending new invitation!')
+            } else {
+              console.log('Invitation successfully sent with response: ', response)
+            }
+          })
+
+          res.status(200).send({ message: 'Estado de la invitación actualizado' })
+        })
+      })
     }
   })
 }
