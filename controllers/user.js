@@ -67,7 +67,7 @@ function signUp (req, res) {
         if (field === 'email') {
           return res.status(409).send({ message: field + ' already exists.', code: 4091 })
         } else {
-          return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+          return res.status(408).send({ message: field + ' already exists.', code: 4092 })
         }
       }
       return res.status(500).send({ message: err.code })
@@ -136,7 +136,7 @@ function updateUser (req, res) {
                   if (field === 'email') {
                     return res.status(409).send({ message: field + ' already exists.', code: 4091 })
                   } else {
-                    return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+                    return res.status(408).send({ message: field + ' already exists.', code: 4092 })
                   }
                 }
                 return res.status(500).send({ message: err.code })
@@ -165,7 +165,7 @@ function updateUser (req, res) {
           if (field === 'email') {
             return res.status(409).send({ message: field + ' already exists.', code: 4091 })
           } else {
-            return res.status(409).send({ message: field + ' already exists.', code: 4092 })
+            return res.status(408).send({ message: field + ' already exists.', code: 4092 })
           }
         }
         return res.status(500).send({ message: err.code })
@@ -173,6 +173,22 @@ function updateUser (req, res) {
 
       res.status(200).send({ message: 'Usuario actualizado correctamente', user: userUpdated })
     })
+  }
+}
+
+function updateUserAvatar (req, res) {
+  let userId = req.params.userId
+  let update = req.body
+  console.log(req.file.filename)
+  if (req.file !== undefined) {
+    User.findByIdAndUpdate(userId, update, { fields: '-__v -password', new: true }, (err, userUpdated) => {
+      if (err) {
+        return res.status(500).send({ message: err.code })
+      }
+      res.status(200).send({ message: 'Usuario actualizado correctamente', avatar: userUpdated.avatar })
+    })
+  } else {
+    res.status(400).send({ message: 'Debe ingresar una imagen', code: 400 })
   }
 }
 
@@ -339,6 +355,7 @@ module.exports = {
   getUser,
   getUserByEmailOrNickname,
   updateUser,
+  updateUserAvatar,
   deleteUser,
   getMyProfile,
   createInvitation,
