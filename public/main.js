@@ -29,12 +29,14 @@ socket.on('bomb', (data) => {
 function changeHumidity () { // eslint-disable-line
   var newHumidity = $('#humidityInput').val()
   socket.emit('change humidity', {message: newHumidity})
+  socket.emit('action bomb', {message: 'Activar bomba'})
   return false
 }
 
 function changeMoisture () { // eslint-disable-line
   var newMoisture = $('#moistureInput').val()
   socket.emit('change moisture', {message: newMoisture})
+  socket.emit('action bomb', {message: 'Activar bomba'})
   return false
 }
 
