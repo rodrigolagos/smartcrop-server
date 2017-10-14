@@ -27,8 +27,10 @@ function getPot (req, res) {
 }
 
 function getPots (req, res) {
+  let io = req.io
   Pot.find({}, '-__v', (err, pots) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
+    io.emit('welcome', 'pots')
     res.status(200).send(pots)
   })
 }

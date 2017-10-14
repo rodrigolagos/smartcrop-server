@@ -4,20 +4,7 @@ const express = require('express')
 const potController = require('../controllers/pot')
 const userController = require('../controllers/user')
 const auth = require('../middlewares/auth')
-const multer = require('multer')
-const path = require('path')
-const crypto = require('crypto')
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/')
-  },
-  filename: function (req, file, cb) {
-    crypto.pseudoRandomBytes(16, function (err, raw) {
-      cb(null, raw.toString('hex') + path.extname(file.originalname))
-    })
-  }
-})
-const upload = multer({ storage: storage })
+const upload = require('../config/multer')
 const api = express.Router()
 
 api.get('/pots', potController.getPots)
