@@ -3,6 +3,7 @@
 const express = require('express')
 const potController = require('../controllers/pot')
 const userController = require('../controllers/user')
+const plantController = require('../controllers/plant')
 const auth = require('../middlewares/auth')
 const upload = require('../config/multer')
 const api = express.Router()
@@ -36,5 +37,11 @@ api.get('/private', auth.isAuth, (req, res) => {
   res.status(200).send({message: `User: ${req.user} Autorizado`})
 })
 api.get('/me', userController.getMyProfile)
+
+api.get('/plants', plantController.getPlants)
+api.get('/plants/:plantId', plantController.getPlant)
+api.post('/plants', plantController.createPlant)
+api.put('/plants/:plantId', plantController.updatePlant)
+api.delete('/plants/:plantId', plantController.deletePlant)
 
 module.exports = api
