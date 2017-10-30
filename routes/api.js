@@ -46,6 +46,8 @@ api.put('/plants/:plantId', plantController.updatePlant)
 api.delete('/plants/:plantId', plantController.deletePlant)
 
 api.get('/posts', postController.getPosts)
+api.get('/posts/public', postController.getPublicPosts)
+api.get('/posts/sale', postController.getSalePosts)
 api.get('/posts/:postId', postController.getPost)
 api.post('/posts', upload.single('image'), postController.createPost)
 api.put('/posts/:postId', upload.single('image'), postController.updatePost)

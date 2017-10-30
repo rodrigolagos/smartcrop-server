@@ -35,6 +35,22 @@ function getPostsByTag (req, res) {
   })
 }
 
+function getPublicPosts (req, res) {
+  Post.find({mode: 'public', type: 'social'}, '-__v', (err, posts) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send(posts)
+  })
+}
+
+function getSalePosts (req, res) {
+  Post.find({type: 'sale'}, '-__v', (err, posts) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send(posts)
+  })
+}
+
 function createPost (req, res) {
   let post = Post()
   post.author = req.body.author
@@ -132,6 +148,8 @@ module.exports = {
   getPost,
   getPosts,
   getPostsByTag,
+  getPublicPosts,
+  getSalePosts,
   createPost,
   updatePost,
   deletePost,
