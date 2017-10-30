@@ -25,6 +25,16 @@ function getPosts (req, res) {
   })
 }
 
+function getPostsByTag (req, res) {
+  let tag = req.params.tag
+
+  Post.find({tags: {$regex: tag, $options: 'i'}}, '-__v', (err, posts) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send(posts)
+  })
+}
+
 function createPost (req, res) {
   let post = Post()
   post.author = req.body.author
@@ -32,6 +42,13 @@ function createPost (req, res) {
   post.type = req.body.type
   post.mode = req.body.mode
   post.text = req.body.text
+
+  if (req.body.tags !== undefined) {
+    console.log(req.body.tags.split(',').length)
+    if (req.body.tags !== '') {
+      post.tags = req.body.tags.split(',')
+    }
+  }
 
   if (req.file !== undefined) {
     post.image = req.file.filename
@@ -114,6 +131,7 @@ function deleteComment (req, res) {
 module.exports = {
   getPost,
   getPosts,
+  getPostsByTag,
   createPost,
   updatePost,
   deletePost,

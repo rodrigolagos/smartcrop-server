@@ -10,6 +10,7 @@ const PostSchema = Schema({
   mode: { type: String, enum: ['public', 'private'], default: 'public' },
   image: String,
   text: String,
+  tags: [String],
   likes: [{
     user: { type: Schema.ObjectId, ref: 'User' }
   }],

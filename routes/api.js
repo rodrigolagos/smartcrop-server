@@ -54,4 +54,6 @@ api.post('/posts/:postId/comments', postController.createComment)
 api.put('/posts/:postId/comments/:commentId', postController.updateComment)
 api.delete('/posts/:postId/comments/:commentId', postController.deleteComment)
 
+api.get('/posts/search/:tag', postController.getPostsByTag)
+
 module.exports = api
