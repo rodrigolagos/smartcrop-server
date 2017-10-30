@@ -73,10 +73,51 @@ function deletePost (req, res) {
   })
 }
 
+function createComment (req, res) {
+  let postId = req.params.postId
+  let author = req.body.author
+  let text = req.body.text
+  let createdAt = Date.now()
+  let updatedAt = Date.now()
+  let update = {}
+
+  update['$push'] = { comments: { author: author, text: text, createdAt: createdAt, updatedAt: updatedAt } }
+  Post.findByIdAndUpdate(postId, update, { fields: '-__v -password', new: true }, (err, postUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send({ message: 'Post actualizado correctamente', post: postUpdated })
+  })
+}
+
+function updateComment (req, res) {
+  let postId = req.params.postId
+  let commentId = req.params.commentId
+
+  Post.findOneAndUpdate({_id: postId, 'comments._id': commentId}, {$set: {'comments.$.text': req.body.text, 'comments.$.updatedAt': Date.now()}}, { new: true }, (err, postUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send({ message: 'Comentario actualizado' })
+  })
+}
+
+function deleteComment (req, res) {
+  let postId = req.params.postId
+  let commentId = req.params.commentId
+
+  Post.findOneAndUpdate({_id: postId}, {$pull: { 'comments': { '_id': commentId } }}, { new: true, safe: true, multi: true }, (err, postUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send({ message: 'Comentario eliminado' })
+  })
+}
+
 module.exports = {
   getPost,
   getPosts,
   createPost,
   updatePost,
-  deletePost
+  deletePost,
+  createComment,
+  updateComment,
+  deleteComment
 }

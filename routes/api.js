@@ -50,5 +50,8 @@ api.get('/posts/:postId', postController.getPost)
 api.post('/posts', upload.single('image'), postController.createPost)
 api.put('/posts/:postId', upload.single('image'), postController.updatePost)
 api.delete('/posts/:postId', postController.deletePost)
+api.post('/posts/:postId/comments', postController.createComment)
+api.put('/posts/:postId/comments/:commentId', postController.updateComment)
+api.delete('/posts/:postId/comments/:commentId', postController.deleteComment)
 
 module.exports = api
