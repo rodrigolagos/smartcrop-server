@@ -47,8 +47,8 @@ api.delete('/plants/:plantId', plantController.deletePlant)
 
 api.get('/posts', postController.getPosts)
 api.get('/posts/:postId', postController.getPost)
-api.post('/posts', postController.createPost)
-api.put('/posts/:postId', postController.updatePost)
+api.post('/posts', upload.single('image'), postController.createPost)
+api.put('/posts/:postId', upload.single('image'), postController.updatePost)
 api.delete('/posts/:postId', postController.deletePost)
 
 module.exports = api

@@ -31,8 +31,11 @@ function createPost (req, res) {
   post.price = req.body.price
   post.type = req.body.type
   post.mode = req.body.mode
-  post.image = req.body.image
   post.text = req.body.text
+
+  if (req.file !== undefined) {
+    post.image = req.file.filename
+  }
 
   post.save((err, postStored) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
@@ -43,6 +46,10 @@ function createPost (req, res) {
 function updatePost (req, res) {
   let postId = req.params.postId
   let update = req.body
+
+  if (req.file !== undefined) {
+    update.image = req.file.filename
+  }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return res.status(404).send({ message: 'El post no existe', code: 404 })
