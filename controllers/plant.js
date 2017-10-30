@@ -70,10 +70,50 @@ function deletePlant (req, res) {
   })
 }
 
+function createTip (req, res) {
+  let plantId = req.params.plantId
+  let type = req.body.type
+  let description = req.body.description
+  let update = {}
+
+  update['$push'] = { tips: { type: type, description: description } }
+  Plant.findByIdAndUpdate(plantId, update, { fields: '-__v', new: true }, (err, plantUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!plantUpdated) return res.status(404).send({ message: 'La planta no existe', code: 404 })
+
+    res.status(200).send({ message: 'Plant actualizado correctamente', plant: plantUpdated })
+  })
+}
+
+function updateTip (req, res) {
+  let plantId = req.params.plantId
+  let tipId = req.params.tipId
+
+  Plant.findOneAndUpdate({_id: plantId, 'tips._id': tipId}, {$set: {'tips.$.type': req.body.type, 'tips.$.description': req.body.description}}, { new: true }, (err, plantUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send({ message: 'Tip actualizado', plant: plantUpdated })
+  })
+}
+
+function deleteTip (req, res) {
+  let plantId = req.params.plantId
+  let tipId = req.params.tipId
+
+  Plant.findOneAndUpdate({_id: plantId}, {$pull: { 'tips': { '_id': tipId } }}, { new: true, safe: true, multi: true }, (err, plantUpdated) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+    res.status(200).send({ message: 'Tip eliminado', plant: plantUpdated })
+  })
+}
+
 module.exports = {
   getPlant,
   getPlants,
   createPlant,
   updatePlant,
-  deletePlant
+  deletePlant,
+  createTip,
+  updateTip,
+  deleteTip
 }
