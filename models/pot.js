@@ -10,6 +10,7 @@ const PotSchema = Schema({
   roomTemperature: {type: Number, default: 0},
   temperature: {type: Number, default: 0},
   owner: {type: Schema.ObjectId, ref: 'User'},
+  plant: {type: Schema.ObjectId, ref: 'Plant'},
   watchers: [{type: Schema.ObjectId, ref: 'User'}],
   requests: [{
     user: { type: Schema.ObjectId, ref: 'User' },

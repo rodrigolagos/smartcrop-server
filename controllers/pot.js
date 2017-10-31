@@ -3,6 +3,7 @@
 const mongoose = require('mongoose')
 const Pot = require('../models/pot')
 const User = require('../models/user')
+const Plant = require('../models/plant')
 const FCM = require('fcm-push')
 
 const serverKey = 'AAAAzN3W5Fg:APA91bH3AELfl3fd_HzADede2jhqMfVM4iGu9AakLuZOvWoQ2iQPTPrE30TwHw8Fgjj2mZ6bPPVfNQVPHyzurvUEWzGkGGCSn-wrqmOvzjPss3OPdSehCsd6MVnULVXCP1V4LnVdGD1Z'
@@ -21,7 +22,10 @@ function getPot (req, res) {
 
     User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
-      res.status(200).send(pot)
+      Plant.populate(pot, { path: 'plant', select: '-__v' }, function (err, pots) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        res.status(200).send(pots)
+      })
     })
   })
 }
@@ -153,7 +157,10 @@ function getPotsByOwner (req, res) {
 
     User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
-      res.status(200).send(pots)
+      Plant.populate(pots, { path: 'plant', select: '-__v' }, function (err, pots) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        res.status(200).send(pots)
+      })
     })
   })
 }
@@ -166,7 +173,10 @@ function getPotsByWatcher (req, res) {
 
     User.populate(pots, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pots) {
       if (err) return res.status(500).send({ message: err.message, code: err.code })
-      res.status(200).send(pots)
+      Plant.populate(pots, { path: 'plant', select: '-__v' }, function (err, pots) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        res.status(200).send(pots)
+      })
     })
   })
 }
