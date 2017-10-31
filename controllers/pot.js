@@ -240,6 +240,27 @@ function deleteWatcher (req, res) {
   })
 }
 
+function deleteOwner (req, res) {
+  let potId = req.params.potId
+  let userId = req.params.userId
+
+  Pot.findById(potId, (err, pot) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!pot) return res.status(404).send({message: 'No existe el pot', code: 404})
+
+    if (pot.owner.toString() === userId) {
+      Pot.findByIdAndUpdate(potId, {$unset: { owner: 1, plant: 1, requests: 1, watchers: 1, humidity: 1, moisture: 1, roomTemperature: 1, temperature: 1 }}, (err, potUpdated) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        if (!potUpdated) return res.status(404).send({message: 'No existe el pot', code: 404})
+
+        res.status(200).send({ message: 'Dueño eliminado', pot: potUpdated })
+      })
+    } else {
+      return res.status(403).send({message: 'No eres dueño de este macetero', code: 403})
+    }
+  })
+}
+
 module.exports = {
   getPot,
   getPots,
@@ -250,5 +271,6 @@ module.exports = {
   getPotsByWatcher,
   getRequests,
   updateRequestStatus,
-  deleteWatcher
+  deleteWatcher,
+  deleteOwner
 }

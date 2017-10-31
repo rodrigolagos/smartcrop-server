@@ -15,6 +15,7 @@ api.post('/pots', potController.createPot)
 api.put('/pots/:potId', potController.updatePot)
 api.delete('/pots/:potId', potController.deletePot)
 api.delete('/pots/:potId/watchers/:userId', potController.deleteWatcher)
+api.delete('/pots/:potId/owner/:userId', potController.deleteOwner)
 api.get('/users/:userId/owner/pots', potController.getPotsByOwner)
 api.get('/users/:userId/watcher/pots', potController.getPotsByWatcher)
 
