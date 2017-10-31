@@ -144,6 +144,49 @@ function deleteComment (req, res) {
   })
 }
 
+function createLike (req, res) {
+  let postId = req.params.postId
+  let userId = req.body.userId
+
+  Post.findById(postId, (err, post) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!post) return res.status(404).send({message: 'No existe el post', code: 404})
+
+    let likers = post.likers.toString()
+    if (likers.indexOf(userId) === -1) {
+      Post.findByIdAndUpdate(postId, { $addToSet: {likers: userId}, $inc: {likes: 1} }, { fields: '-__v', new: true }, (err, postUpdated) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        if (!postUpdated) return res.status(404).send({message: 'No existe el post', code: 404})
+
+        res.status(200).send({ message: 'Like agregado correctamente', post: postUpdated })
+      })
+    } else {
+      return res.status(403).send({ message: 'Ya le has dado like a este post', code: 403 })
+    }
+  })
+}
+
+function deleteLike (req, res) {
+  let postId = req.params.postId
+  let userId = req.body.userId
+
+  Post.findById(postId, (err, post) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!post) return res.status(404).send({message: 'No existe el post', code: 404})
+
+    let likers = post.likers.toString()
+    if (likers.indexOf(userId) === -1) {
+      return res.status(403).send({ message: 'Aun no le das like a este post', code: 403 })
+    } else {
+      Post.findOneAndUpdate({_id: postId}, {$pull: { 'likers': userId }, $inc: {likes: -1}}, { new: true, safe: true, multi: true }, (err, postUpdated) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+        res.status(200).send({ message: 'Like eliminado', post: postUpdated })
+      })
+    }
+  })
+}
+
 module.exports = {
   getPost,
   getPosts,
@@ -155,5 +198,7 @@ module.exports = {
   deletePost,
   createComment,
   updateComment,
-  deleteComment
+  deleteComment,
+  createLike,
+  deleteLike
 }

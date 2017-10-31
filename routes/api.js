@@ -58,6 +58,8 @@ api.delete('/posts/:postId', postController.deletePost)
 api.post('/posts/:postId/comments', postController.createComment)
 api.put('/posts/:postId/comments/:commentId', postController.updateComment)
 api.delete('/posts/:postId/comments/:commentId', postController.deleteComment)
+api.post('/posts/:postId/likes', postController.createLike)
+api.delete('/posts/:postId/likes', postController.deleteLike)
 
 api.get('/posts/search/:tag', postController.getPostsByTag)
 

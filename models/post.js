@@ -11,9 +11,8 @@ const PostSchema = Schema({
   image: String,
   text: String,
   tags: [String],
-  likes: [{
-    user: { type: Schema.ObjectId, ref: 'User' }
-  }],
+  likes: {type: Number, default: 0},
+  likers: [{type: Schema.ObjectId, ref: 'User'}],
   comments: [{
     author: { type: Schema.ObjectId, ref: 'User' },
     text: String,
