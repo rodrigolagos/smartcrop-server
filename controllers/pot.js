@@ -219,6 +219,27 @@ function updateRequestStatus (req, res) {
   })
 }
 
+function deleteWatcher (req, res) {
+  let potId = req.params.potId
+  let userId = req.params.userId
+
+  Pot.findById(potId, (err, pot) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!pot) return res.status(404).send({message: 'No existe el pot', code: 404})
+
+    let watchers = pot.watchers.toString()
+    if (watchers.indexOf(userId) === -1) {
+      return res.status(403).send({ message: 'Aun no eres observador de este pot', code: 403 })
+    } else {
+      Pot.findOneAndUpdate({_id: potId}, {$pull: { 'watchers': userId }}, { new: true, safe: true, multi: true }, (err, potUpdated) => {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+        res.status(200).send({ message: 'Observador eliminado', post: potUpdated })
+      })
+    }
+  })
+}
+
 module.exports = {
   getPot,
   getPots,
@@ -228,5 +249,6 @@ module.exports = {
   getPotsByOwner,
   getPotsByWatcher,
   getRequests,
-  updateRequestStatus
+  updateRequestStatus,
+  deleteWatcher
 }
