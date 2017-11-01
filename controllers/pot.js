@@ -98,12 +98,29 @@ function updatePot (req, res) {
               }
             }
           }
-
           Pot.findByIdAndUpdate(potId, update, { fields: '-__v', new: true }, (err, potUpdated) => {
             if (err) return res.status(500).send({ message: err.message, code: err.code })
-
             User.populate(potUpdated, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
               if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 2,
+                  notificationUrl: '',
+                  notificationTitle: 'Han solicitado ver tu macetero',
+                  notificationContent: 'Revisa quién quiere ser observador de tu macetero!',
+                  notificationOpenOnClick: 'NOTIFICATION'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Solicitud de observar pot: Successfully sent with response: ', response)
+                }
+              })
+
               res.status(200).send({ message: 'Macetero actualizado correctamente', pot: potUpdated })
             })
           })
@@ -115,24 +132,172 @@ function updatePot (req, res) {
   } else {
     Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
       if (err) return res.status(500).send({ message: `Error al realizar petición: ${err}` })
-      if (potUpdated.humidity > 60) {
-        let message = {
-          to: '/topics/demo',
-          notification: {
-            title: 'Humedad muy alta',
-            body: 'La humedad en tu macetero es de ' + potUpdated.humidity + '%',
-            sound: true
+      if (!potUpdated) return res.status(404).send({ message: 'El pot no existe', code: 404 })
+
+      Plant.populate(potUpdated, { path: 'plant', select: '-__v' }, function (err, pot) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        User.populate(potUpdated, { path: 'owner', select: '-__v -password' }, function (err, pot) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+          if (update['humidity'] !== undefined) {
+            if (potUpdated.humidity > potUpdated.plant.maxHum) {
+              let io = req.io
+              io.emit('humidity', {message: potUpdated.humidity})
+              console.log(potUpdated.owner.deviceToken)
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Humedad muy alta',
+                  notificationContent: 'La humedad en tu macetero es de ' + potUpdated.humidity + '%',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Humedad muy alta: Successfully sent with response: ', response)
+                }
+              })
+            } else if (potUpdated.humidity < potUpdated.plant.minHum) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Humedad muy baja',
+                  notificationContent: 'La humedad en tu macetero es de ' + potUpdated.humidity + '%',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Humedad muy baja: Successfully sent with response: ', response)
+                }
+              })
+            }
+          } else if (update['moisture'] !== undefined) {
+            if (potUpdated.moisture > potUpdated.plant.maxMoist) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Humedad terrestre muy alta',
+                  notificationContent: 'La humedad terrestre n tu macetero es de ' + potUpdated.moisture + '%',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Humedad de tierra muy alta: Successfully sent with response: ', response)
+                }
+              })
+            } else if (potUpdated.moisture < potUpdated.plant.minMoist) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Humedad terrestre muy baja',
+                  notificationContent: 'La humedad terrestre en tu macetero es de ' + potUpdated.moisture + '%',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Humedad de tierra muy baja: Successfully sent with response: ', response)
+                }
+              })
+            }
+          } else if (update['roomTemperature'] !== undefined) {
+            if (potUpdated.roomTemperature > potUpdated.plant.maxRoomTemp) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Temperatura ambiental muy alta',
+                  notificationContent: 'La temperatura ambiental en tu macetero es de ' + potUpdated.roomTemperature + 'ºC',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Temperatura ambiental muy alta: Successfully sent with response: ', response)
+                }
+              })
+            } else if (potUpdated.roomTemperature < potUpdated.plant.minRoomTemp) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Temperatura ambiental muy baja',
+                  notificationContent: 'La temperatura ambiental en tu macetero es de ' + potUpdated.roomTemperature + 'ºC',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Temperatura ambiental muy baja: Successfully sent with response: ', response)
+                }
+              })
+            }
+          } else if (update['temperature'] !== undefined) {
+            if (potUpdated.temperature > potUpdated.plant.maxTemp) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Temperatura de la tierra muy alta',
+                  notificationContent: 'La temperatura de la tierra en tu macetero es de ' + potUpdated.temperature + 'ºC',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Temperatura de la tierra muy alta: Successfully sent with response: ', response)
+                }
+              })
+            } else if (potUpdated.temperature < potUpdated.plant.minTemp) {
+              let message = {
+                to: potUpdated.owner.deviceToken,
+                data: {
+                  typeData: 1,
+                  notificationUrl: '',
+                  notificationTitle: 'Temperatura de la tierra muy baja',
+                  notificationContent: 'La temperatura de la tierra en tu macetero es de ' + potUpdated.temperature + 'ºC',
+                  notificationOpenOnClick: 'POTS'
+                }
+              }
+              fcm.send(message, function (err, response) {
+                if (err) {
+                  console.log('Something has gone wrong!')
+                } else {
+                  console.log('Temperatura de la tierra muy baja: Successfully sent with response: ', response)
+                }
+              })
+            }
           }
-        }
-        fcm.send(message, function (err, response) {
-          if (err) {
-            console.log('Something has gone wrong!')
-          } else {
-            console.log('Successfully sent with response: ', response)
-          }
+          res.status(200).send({ message: 'Macetero actualizado correctamente', pot: potUpdated })
         })
-      }
-      res.status(200).send(potUpdated)
+      })
     })
   }
 }
@@ -206,15 +371,74 @@ function updateRequestStatus (req, res) {
       let request = potUpdated.requests.filter(function (obj) {
         return obj._id.toString() === requestId
       })
+      console.log(request)
       let userId = request[0].user
       update['$addToSet'] = { watchers: userId }
       delete update['status']
       Pot.findByIdAndUpdate(potId, update, { new: true }, (err, potUpdated) => {
         if (err) return res.status(500).send({ message: err.message, code: err.code })
-        res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+        User.populate(potUpdated, [{ path: 'requests.user', select: '-__v -password' }], function (err, pots) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+          let request = potUpdated.requests.filter(function (obj) {
+            return obj._id.toString() === requestId
+          })
+          /* ********************************************************************* */
+          /* BORRAR ESTE CONSOLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE */
+          /* ********************************************************************* */
+          console.log('Solicitud para observar macetero aceptada, *enviar notificacion*')
+          console.log(request[0].user.deviceToken)
+          let message = {
+            to: request[0].user.deviceToken,
+            data: {
+              typeData: 1,
+              notificationUrl: '',
+              notificationTitle: 'Han aceptado tu solicitud',
+              notificationContent: 'Tu solicitud para observar un macetero ha sido aceptada',
+              notificationOpenOnClick: 'POTS'
+            }
+          }
+          fcm.send(message, function (err, response) {
+            if (err) {
+              console.log('Something has gone wrong!')
+            } else {
+              console.log('Solicitud para ver macetero aceptada: Successfully sent with response: ', response)
+            }
+          })
+          res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+        })
       })
     } else {
-      res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+      User.populate(potUpdated, [{ path: 'requests.user', select: '-__v -password' }], function (err, pots) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+
+        let request = potUpdated.requests.filter(function (obj) {
+          return obj._id.toString() === requestId
+        })
+        /* ********************************************************************* */
+        /* BORRAR ESTE CONSOLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE */
+        /* ********************************************************************* */
+        console.log('Solicitud para observar macetero rechazada, *enviar notificacion*')
+        console.log(request[0].user.deviceToken)
+        let message = {
+          to: request[0].user.deviceToken,
+          data: {
+            typeData: 1,
+            notificationUrl: '',
+            notificationTitle: 'Han rechazado tu solicitud',
+            notificationContent: 'Tu solicitud para observar un macetero ha sido rechazada',
+            notificationOpenOnClick: 'POTS'
+          }
+        }
+        fcm.send(message, function (err, response) {
+          if (err) {
+            console.log('Something has gone wrong!')
+          } else {
+            console.log('Solicitud para ver macetero rechazada: Successfully sent with response: ', response)
+          }
+        })
+        res.status(200).send({ message: 'Estado de la solicitud actualizado' })
+      })
     }
   })
 }

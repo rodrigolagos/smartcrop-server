@@ -254,17 +254,19 @@ function createInvitation (req, res) {
 
           let message = {
             to: userUpdated.deviceToken,
-            notification: {
-              title: 'Nueva invitación',
-              body: 'Te han invitado a observar un macetero',
-              sound: true
+            data: {
+              typeData: 3,
+              notificationUrl: '',
+              notificationTitle: 'Nueva invitación',
+              notificationContent: 'Te han invitado a observar un macetero',
+              notificationOpenOnClick: 'NOTIFICATION'
             }
           }
           fcm.send(message, function (err, response) {
             if (err) {
               console.log('Something has gone wrong while sending new invitation!')
             } else {
-              console.log('Invitation successfully sent with response: ', response)
+              console.log('Invitacion para ver macetero: Successfully sent with response: ', response)
             }
           })
 
@@ -310,17 +312,19 @@ function updateInvitationStatus (req, res) {
 
           let message = {
             to: potUpdated.owner.deviceToken,
-            notification: {
-              title: 'Invitación aceptada',
-              body: 'Han aceptado tu invitación',
-              sound: true
+            data: {
+              typeData: 1,
+              notificationUrl: '',
+              notificationTitle: 'Invitación aceptada',
+              notificationContent: 'Tu invitación para observar un macetero ha sido aceptada',
+              notificationOpenOnClick: 'POTS'
             }
           }
           fcm.send(message, function (err, response) {
             if (err) {
               console.log('Something has gone wrong while sending new invitation!')
             } else {
-              console.log('Invitation successfully sent with response: ', response)
+              console.log('Invitación para ver maceta aceptada: Successfully sent with response: ', response)
             }
           })
 
@@ -341,17 +345,19 @@ function updateInvitationStatus (req, res) {
 
           let message = {
             to: pot.owner.deviceToken,
-            notification: {
-              title: 'Invitación rechazada',
-              body: 'No han aceptado tu invitación',
-              sound: true
+            data: {
+              typeData: 1,
+              notificationUrl: '',
+              notificationTitle: 'Invitación rechazada',
+              notificationContent: 'Tu invitación para observar un macetero ha sido rechazada',
+              notificationOpenOnClick: ''
             }
           }
           fcm.send(message, function (err, response) {
             if (err) {
               console.log('Something has gone wrong while sending new invitation!')
             } else {
-              console.log('Invitation successfully sent with response: ', response)
+              console.log('Invitación para ver maceta rechazada: Successfully sent with response: ', response)
             }
           })
 
