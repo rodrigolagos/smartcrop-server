@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose')
 const Post = require('../models/post')
+const User = require('../models/user')
 
 function getPost (req, res) {
   let postId = req.params.postId
@@ -14,14 +15,21 @@ function getPost (req, res) {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
     if (!post) return res.status(404).send({ message: 'El post no existe', code: 404 })
 
-    res.status(200).send(post)
+    User.populate(post, [{ path: 'author', select: '-__v -password -invitations' }, { path: 'comments.author', select: '-__v -password -invitations' }], function (err, post) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(post)
+    })
   })
 }
 
 function getPosts (req, res) {
   Post.find({}, '-__v', (err, posts) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
-    res.status(200).send(posts)
+
+    User.populate(posts, [{ path: 'author', select: '-__v -password -invitations' }, { path: 'comments.author', select: '-__v -password -invitations' }], function (err, posts) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(posts)
+    })
   })
 }
 
@@ -31,7 +39,10 @@ function getPostsByTag (req, res) {
   Post.find({tags: {$regex: tag, $options: 'i'}}, '-__v', (err, posts) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
 
-    res.status(200).send(posts)
+    User.populate(posts, [{ path: 'author', select: '-__v -password -invitations' }, { path: 'comments.author', select: '-__v -password -invitations' }], function (err, posts) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(posts)
+    })
   })
 }
 
@@ -39,7 +50,10 @@ function getPublicPosts (req, res) {
   Post.find({mode: 'public', type: 'social'}, '-__v', (err, posts) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
 
-    res.status(200).send(posts)
+    User.populate(posts, [{ path: 'author', select: '-__v -password -invitations' }, { path: 'comments.author', select: '-__v -password -invitations' }], function (err, posts) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(posts)
+    })
   })
 }
 
@@ -47,7 +61,10 @@ function getSalePosts (req, res) {
   Post.find({type: 'sale'}, '-__v', (err, posts) => {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
 
-    res.status(200).send(posts)
+    User.populate(posts, [{ path: 'author', select: '-__v -password -invitations' }, { path: 'comments.author', select: '-__v -password -invitations' }], function (err, posts) {
+      if (err) return res.status(500).send({ message: err.message, code: err.code })
+      res.status(200).send(posts)
+    })
   })
 }
 
