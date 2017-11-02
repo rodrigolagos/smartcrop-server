@@ -23,7 +23,7 @@ socket.on('temperature', (data) => {
 })
 
 socket.on('bomb', (data) => {
-  console.log(data.message)
+  console.log(data)
 })
 
 function changeHumidity () { // eslint-disable-line
@@ -53,11 +53,11 @@ function changeTemperature () { // eslint-disable-line
 }
 
 function activateBomb () { // eslint-disable-line
-  socket.emit('action bomb', {message: 'Activar bomba'})
+  socket.emit('action bomb', 'Activar bomba,59fa7ae9d23faf60bbaea1ea')
   return false
 }
 
 function deactivateBomb () { // eslint-disable-line
-  socket.emit('action bomb', {message: 'Desactivar bomba'})
+  socket.emit('action bomb', 'Desactivar bomba,59fa7ae9d23faf60bbaea1ea')
   return false
 }

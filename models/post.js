@@ -18,7 +18,9 @@ const PostSchema = Schema({
     text: String,
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
-  }]
+  }],
+  lat: String,
+  long: String
 }, { timestamps: true })
 
 module.exports = mongoose.model('Post', PostSchema)
