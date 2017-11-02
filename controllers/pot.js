@@ -20,13 +20,23 @@ function getPot (req, res) {
     if (err) return res.status(500).send({ message: err.message, code: err.code })
     if (!pot) return res.status(404).send({ message: 'El pot no existe', code: 404 })
 
-    User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
-      if (err) return res.status(500).send({ message: err.message, code: err.code })
-      Plant.populate(pot, { path: 'plant', select: '-__v' }, function (err, pots) {
+    if (pot.owner !== undefined) {
+      User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
         if (err) return res.status(500).send({ message: err.message, code: err.code })
-        res.status(200).send(pots)
+        Plant.populate(pot, { path: 'plant', select: '-__v' }, function (err, pots) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+          res.status(200).send(pots)
+        })
       })
-    })
+    } else {
+      User.populate(pot, [{ path: 'watchers', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
+        if (err) return res.status(500).send({ message: err.message, code: err.code })
+        Plant.populate(pot, { path: 'plant', select: '-__v' }, function (err, pots) {
+          if (err) return res.status(500).send({ message: err.message, code: err.code })
+          res.status(200).send(pots)
+        })
+      })
+    }
   })
 }
 
