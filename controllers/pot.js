@@ -151,7 +151,9 @@ function updatePot (req, res) {
 
           let io = req.io
           let clients = []
-          clients.push(potUpdated.owner.socketId)
+          if (potUpdated.owner !== undefined) {
+            clients.push(potUpdated.owner.socketId)
+          }
           potUpdated.watchers.forEach(function (el) {
             clients.push(el.socketId)
           })
