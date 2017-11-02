@@ -188,7 +188,8 @@ function updatePot (req, res) {
                 }
               })
             }
-          } else if (update['moisture'] !== undefined) {
+          }
+          if (update['moisture'] !== undefined) {
             clients.forEach(function (el) {
               io.to(el).emit('moisture', {message: potUpdated.moisture})
             })
@@ -229,7 +230,8 @@ function updatePot (req, res) {
                 }
               })
             }
-          } else if (update['roomTemperature'] !== undefined) {
+          }
+          if (update['roomTemperature'] !== undefined) {
             clients.forEach(function (el) {
               io.to(el).emit('room temperature', {message: potUpdated.roomTemperature})
             })
@@ -270,7 +272,8 @@ function updatePot (req, res) {
                 }
               })
             }
-          } else if (update['temperature'] !== undefined) {
+          }
+          if (update['temperature'] !== undefined) {
             clients.forEach(function (el) {
               io.to(el).emit('temperature', {message: potUpdated.temperature})
             })
