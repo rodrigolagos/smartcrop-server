@@ -10,6 +10,7 @@ const UserSchema = new Schema({
   password: { type: String, required: true },
   nickname: { type: String, unique: true, required: true },
   deviceToken: String,
+  socketId: String,
   avatar: { type: String, default: 'default.jpg' },
   invitations: [{
     pot: { type: Schema.ObjectId, ref: 'Pot' },

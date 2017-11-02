@@ -136,13 +136,21 @@ function updatePot (req, res) {
 
       Plant.populate(potUpdated, { path: 'plant', select: '-__v' }, function (err, pot) {
         if (err) return res.status(500).send({ message: err.message, code: err.code })
-        User.populate(potUpdated, { path: 'owner', select: '-__v -password' }, function (err, pot) {
+        User.populate(potUpdated, [{ path: 'owner', select: '-__v -password' }, { path: 'watchers', select: '-__v -password' }], function (err, pot) {
           if (err) return res.status(500).send({ message: err.message, code: err.code })
 
+          let io = req.io
+          let clients = []
+          clients.push(potUpdated.owner.socketId)
+          potUpdated.watchers.forEach(function (el) {
+            clients.push(el.socketId)
+          })
+
           if (update['humidity'] !== undefined) {
+            clients.forEach(function (el) {
+              io.to(el).emit('humidity', {message: potUpdated.humidity})
+            })
             if (potUpdated.humidity > potUpdated.plant.maxHum) {
-              let io = req.io
-              io.emit('humidity', {message: potUpdated.humidity})
               console.log(potUpdated.owner.deviceToken)
               let message = {
                 to: potUpdated.owner.deviceToken,
@@ -181,6 +189,9 @@ function updatePot (req, res) {
               })
             }
           } else if (update['moisture'] !== undefined) {
+            clients.forEach(function (el) {
+              io.to(el).emit('moisture', {message: potUpdated.moisture})
+            })
             if (potUpdated.moisture > potUpdated.plant.maxMoist) {
               let message = {
                 to: potUpdated.owner.deviceToken,
@@ -219,6 +230,9 @@ function updatePot (req, res) {
               })
             }
           } else if (update['roomTemperature'] !== undefined) {
+            clients.forEach(function (el) {
+              io.to(el).emit('room temperature', {message: potUpdated.roomTemperature})
+            })
             if (potUpdated.roomTemperature > potUpdated.plant.maxRoomTemp) {
               let message = {
                 to: potUpdated.owner.deviceToken,
@@ -257,6 +271,9 @@ function updatePot (req, res) {
               })
             }
           } else if (update['temperature'] !== undefined) {
+            clients.forEach(function (el) {
+              io.to(el).emit('temperature', {message: potUpdated.temperature})
+            })
             if (potUpdated.temperature > potUpdated.plant.maxTemp) {
               let message = {
                 to: potUpdated.owner.deviceToken,
@@ -383,11 +400,6 @@ function updateRequestStatus (req, res) {
           let request = potUpdated.requests.filter(function (obj) {
             return obj._id.toString() === requestId
           })
-          /* ********************************************************************* */
-          /* BORRAR ESTE CONSOLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE */
-          /* ********************************************************************* */
-          console.log('Solicitud para observar macetero aceptada, *enviar notificacion*')
-          console.log(request[0].user.deviceToken)
           let message = {
             to: request[0].user.deviceToken,
             data: {
@@ -415,11 +427,6 @@ function updateRequestStatus (req, res) {
         let request = potUpdated.requests.filter(function (obj) {
           return obj._id.toString() === requestId
         })
-        /* ********************************************************************* */
-        /* BORRAR ESTE CONSOLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE */
-        /* ********************************************************************* */
-        console.log('Solicitud para observar macetero rechazada, *enviar notificacion*')
-        console.log(request[0].user.deviceToken)
         let message = {
           to: request[0].user.deviceToken,
           data: {
