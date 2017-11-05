@@ -252,9 +252,15 @@ function createInvitation (req, res) {
         Pot.populate(userUpdated, [{ path: 'invitations.pot', select: '-__v' }], function (err, user) {
           if (err) return res.status(500).send({ message: err.message, code: err.code })
 
+          let invitation = userUpdated.invitations.filter(function (obj) {
+            return obj.pot._id.toString() === potId
+          })
+          let invitationId = invitation[0]._id
+
           let message = {
             to: userUpdated.deviceToken,
             data: {
+              invitationId: invitationId,
               typeData: 3,
               notificationUrl: '',
               notificationTitle: 'Nueva invitación',

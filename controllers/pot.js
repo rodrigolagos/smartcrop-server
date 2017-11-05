@@ -113,9 +113,16 @@ function updatePot (req, res) {
             User.populate(potUpdated, [{ path: 'watchers', select: '-__v -password' }, { path: 'owner', select: '-__v -password' }, { path: 'requests.user', select: '-__v -password' }], function (err, pot) {
               if (err) return res.status(500).send({ message: err.message, code: err.code })
 
+              console.log(update['$push'].requests)
+              let request = potUpdated.requests.filter(function (obj) {
+                return obj.user._id.toString() === update['$push'].requests.user
+              })
+              let requestId = request[0]._id
               let message = {
                 to: potUpdated.owner.deviceToken,
                 data: {
+                  potId: potId,
+                  requestId: requestId,
                   typeData: 2,
                   notificationUrl: '',
                   notificationTitle: 'Han solicitado ver tu macetero',
