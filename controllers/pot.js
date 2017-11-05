@@ -125,8 +125,8 @@ function updatePot (req, res) {
                   requestId: requestId,
                   typeData: 2,
                   notificationUrl: '',
-                  notificationTitle: 'Han solicitado ver tu macetero',
-                  notificationContent: 'Revisa quién quiere ser observador de tu macetero!',
+                  notificationTitle: 'Nueva solicitud',
+                  notificationContent: 'Han solicitado ver tu macetero',
                   notificationOpenOnClick: 'NOTIFICATION'
                 }
               }

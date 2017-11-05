@@ -260,6 +260,7 @@ function createInvitation (req, res) {
           let message = {
             to: userUpdated.deviceToken,
             data: {
+              userId: userId,
               invitationId: invitationId,
               typeData: 3,
               notificationUrl: '',
@@ -411,6 +412,39 @@ function resetPassword (req, res) {
   })
 }
 
+function sendMessage (req, res) {
+  let userIdTo = req.params.userId
+  let userIdFrom = req.body.userId
+  let message = req.body.message
+
+  User.findById(userIdTo, '-__v -password', (err, user) => {
+    if (err) return res.status(500).send({ message: err.message, code: err.code })
+    if (!user) return res.status(404).send({ message: 'No existe el usuario', code: 404 })
+
+    let messageFcm = {
+      to: user.deviceToken,
+      data: {
+        typeData: 4,
+        notificationUrl: '',
+        notificationTitle: 'Nuevo mensaje',
+        notificationOpenOnClick: 'CHATS',
+        messageSenderId: userIdFrom,
+        messageReceiverId: userIdTo,
+        messageContent: message
+      }
+    }
+    fcm.send(messageFcm, function (err, response) {
+      if (err) {
+        console.log('Something has gone wrong while sending message!')
+      } else {
+        console.log('Mensaje enviado: Successfully sent with response: ', response)
+      }
+    })
+
+    res.status(200).send({message: 'Mensaje enviado correctamente'})
+  })
+}
+
 module.exports = {
   signUp,
   signIn,
@@ -424,5 +458,6 @@ module.exports = {
   createInvitation,
   getInvitations,
   updateInvitationStatus,
-  resetPassword
+  resetPassword,
+  sendMessage
 }
