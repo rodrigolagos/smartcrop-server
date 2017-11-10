@@ -319,12 +319,10 @@ function updateInvitationStatus (req, res) {
 
           let message = {
             to: potUpdated.owner.deviceToken,
-            data: {
-              typeData: 1,
-              notificationUrl: '',
-              notificationTitle: 'Invitación aceptada',
-              notificationContent: 'Tu invitación para observar un macetero ha sido aceptada',
-              notificationOpenOnClick: 'POTS'
+            notification: {
+              title: 'Invitación aceptada',
+              body: 'Tu invitación para observar un macetero ha sido aceptada',
+              sound: true
             }
           }
           fcm.send(message, function (err, response) {
@@ -352,12 +350,10 @@ function updateInvitationStatus (req, res) {
 
           let message = {
             to: pot.owner.deviceToken,
-            data: {
-              typeData: 1,
-              notificationUrl: '',
-              notificationTitle: 'Invitación rechazada',
-              notificationContent: 'Tu invitación para observar un macetero ha sido rechazada',
-              notificationOpenOnClick: ''
+            notification: {
+              title: 'Invitación rechazada',
+              body: 'Tu invitación para observar un macetero ha sido rechazada',
+              sound: true
             }
           }
           fcm.send(message, function (err, response) {
